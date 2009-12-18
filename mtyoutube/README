@@ -1,0 +1,21 @@
+MTYoutube - a multitouch youtube browser
+========================================
+
+
+Authors
+-------
+
+* Mathieu Virbel <tito@bankiz.org>
+
+
+Dependices
+----------
+
+* None
+
+
+How to run
+----------
+
+python mtyoutube.py
+
