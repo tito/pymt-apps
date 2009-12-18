@@ -5,13 +5,13 @@ MTYoutube - a multitouch youtube browser
 Authors
 -------
 
-* Mathieu Virbel <tito@bankiz.org>
+Mathieu Virbel <tito@bankiz.org>
 
 
 Dependices
 ----------
 
-* None
+PyMT 0.4
 
 
 How to run
