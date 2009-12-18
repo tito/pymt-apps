@@ -1,0 +1,26 @@
+MTMaps - 0.2.1
+==============
+
+Author
+------
+
+Mathieu Virbel <tito@bankiz.org>
+
+
+Dependices
+----------
+
+PyMT 0.4
+
+
+How to run
+----------
+
+python mtmaps.py
+
+
+Bugs
+----
+
+  * Tooltips don't show the good lat/lon
+  * Sometime, loading stop. You must restart application
