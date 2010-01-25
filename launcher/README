@@ -1,0 +1,25 @@
+Launcher 0.4
+============
+
+Author
+------
+
+Mathieu Virbel <tito@bankiz.org>
+
+
+Dependices
+----------
+
+PyMT 0.4
+
+
+Configure
+---------
+
+Adjust the config.txt to your system
+
+How to run
+----------
+
+python launcher.py
+

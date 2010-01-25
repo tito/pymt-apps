@@ -1,0 +1,76 @@
+[mtmaps]
+label=Map browser
+desc=Naviguer sur les cartes terrestes
+icon=./data/mtmaps.png
+path=/home/tito/code/mtmaps/
+exec=python mtmaps.py -m closeapp
+
+[paint]
+label=Paint
+desc=Dessinez avec une main, deux mains... :)
+icon=./data/paint.png
+path=/home/tito/code/pymt/examples/paint/
+exec=python paint.py -m closeapp
+
+[musics]
+label=Mini synth
+desc=Jouez de la musique !
+icon=./data/music.png
+path=/home/tito/code/musics/
+exec=python pymt_sndobj.py -m closeapp
+
+[desktop]
+label=PyMT Desktop
+desc=Lancer plusieurs applications, en dessinant une vague.
+icon=./data/desktop.png
+path=/home/tito/code/pymt/examples/desktop
+exec=python start.py -m closeapp
+
+[untangle]
+label=Untangle
+desc=Demelez les fils
+icon=./data/untangle.png
+path=/home/tito/code/pymt/examples/untangle
+exec=python untangle.py -m closeapp
+
+[pictures]
+label=Images
+desc=Demonstration du Scatter (zoom, rotation...)
+icon=./data/pictures.png
+path=/home/tito/code/pymt/examples/pictures
+exec=python pictures.py -m closeapp
+
+[bobomb]
+label=Bob-bomb
+desc=Rangez les bombes de couleurs avant l'explosions !
+icon=./data/bobomb.png
+path=/home/tito/code/pymt/examples/bubblebomb
+exec=python bubblebomb.py -m closeapp
+
+[fridgeletter]
+label=Lettre de frigo
+desc=Amusez vous avec les lettres !
+icon=./data/fridgeletter.png
+path=/home/tito/code/pymt/examples/fridgeletter
+exec=python fridgeletter.py -m closeapp
+
+[mandelbrot]
+label=Mandelbrot
+desc=Plongez au coeur de la fractale de Mandelbrot
+icon=./data/mandelbrot.png
+path=/home/tito/code/pymt/examples/mandelbrot
+exec=python mandelbrot.py -m closeapp
+
+[touchtracer]
+label=Touch tracer
+desc=Application de demo multitouch
+icon=./data/touchtracer.png
+path=/home/tito/code/pymt/examples/touchtracer
+exec=python touchtracer.py -m closeapp
+
+[pong]
+label=Pong
+desc=The best game ever :)
+icon=./data/pong.png
+path=/home/tito/code/pymt/examples/wang
+exec=python wang.py -m closeapp
