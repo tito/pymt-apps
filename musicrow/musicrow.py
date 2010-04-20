@@ -19,7 +19,28 @@ x transpose up/down
 '''
 
 from pymt import *
+from OpenGL.GL import glTranslatef
 
+
+class MusicButtonMatrix(MTButtonMatrix):
+    def __init__(self, **kwargs):
+        super(MusicButtonMatrix, self).__init__(**kwargs)
+        self.col = 0
+
+    def draw_tile(self, i, j):
+        if self.matrix[i][j] == 0:
+            set_color(*self.buttoncolor)
+        elif self.matrix[i][j] == 1:
+            set_color(*self.downcolor)
+
+        with gx_matrix:
+            glTranslatef(self.width/self._matrix_size[0]*i +self.x, self.height/self._matrix_size[1]*j+self.y,0)
+            s =  (self.width/self._matrix_size[0]-self.border,self.height/self._matrix_size[1]-self.border)
+            drawRoundedRectangle(size=s)
+
+            if i == self.col:
+                set_color(1, 1, 1, .2)
+                drawRoundedRectangle(size=s)
 
 class World(MTWidget):
 	def __init__(self, **kwargs):
@@ -28,13 +49,20 @@ class World(MTWidget):
 		self.bpm = 180
 		self.game_of_life = False
 		self.paused = False
-		self.reset()
+		
+		self.gridx = 16
+		self.gridy = 16
+		self.stepx = 1;
+		self.stepy = 1;
 		
 		# load a music scale
 		self.sound = []
 		self.load_kalimba() #by default
 		
+		self.create_matrix()
 		self.create_menu()
+		
+		self.reset()
 		
 		#go for it !
 		getClock().schedule_interval(self.play, 60.0/self.bpm)
@@ -56,27 +84,28 @@ class World(MTWidget):
 
 	def create_menu(self):
 		xml = '''<?xml version="1.0" encoding="UTF-8"?>
-		<MTBoxLayout id="'menu'" orientation="'vertical'" invert_y="True">
-		 <MTGridLayout cols="2">
+		<MTBoxLayout size_hint='(None,None)' id="'menu'" orientation="'vertical'" invert_y="True">
+		 <MTGridLayout size_hint='(None,None)' cols="2">
 		  <MTLabel label="'Bpm:'" size="(120, 30)"/>
 		  <MTSlider id="'slider_tempo'" min="50" max="300" value="180" orientation="'horizontal'" value_show="True" size="(200, 30)"/>
 		 </MTGridLayout>
-		 <MTGridLayout cols="3">
+		 <MTGridLayout size_hint='(None,None)' cols="3">
 		  <MTLabel label="'Instrument:'" size="(120, 30)"/>
           <MTButton id="'button_kalimba'" label="'Kalimba'" size="(100, 30)"/>
           <MTButton id="'button_oud'" label="'Oud'" size="(100, 30)"/>
 		 </MTGridLayout>
-		 <MTGridLayout cols="3">
+		 <MTGridLayout size_hint='(None,None)' cols="3">
 		  <MTLabel label="'Transpose:'" size="(120, 30)"/>
 		  <MTButton id="'button_transpose_up'" label="'Up'" size="(100, 30)"/>
 		  <MTButton id="'button_transpose_down'" label="'Down'" size="(100, 30)"/>
 		 </MTGridLayout>
-		 <MTGridLayout cols="3">
+		 <MTGridLayout size_hint='(None,None)' cols="4">
+		  <MTLabel label="''" size="(120, 30)"/>
 		  <MTButton id="'button_clear'" label="'Clear'" size="(100, 30)"/>
 		  <MTButton id="'button_pause'" label="'Pause'" size="(100, 30)"/>
 		  <MTButton id="'button_game_of_life'" label="'Game of life'" size="(100, 30)"/>
 		 </MTGridLayout>
-		 <MTGridLayout cols="6">
+		 <MTGridLayout size_hint='(None,None)' cols="6">
 		  <MTLabel label="'Preset:'" size="(120, 30)"/>
 		  <MTButton id="'button_preset1'" label="'Offspring'" size="(100, 30)"/>
 		  <MTButton id="'button_preset2'" label="'Close Encounters'" size="(120, 30)"/>
@@ -90,30 +119,29 @@ class World(MTWidget):
 		w = XMLWidget()
 		w.loadString(xml)
 
-		layout = getWidgetById('menu')
-		corner = MTSidePanel(layout=layout)
+		corner = MTSidePanel(layout=w.root)
 		self.add_widget(corner)
-		getWidgetById('slider_tempo').connect('on_value_change', self.update_bpm)
-		getWidgetById('button_kalimba').connect('on_press', self.load_kalimba)
-		getWidgetById('button_oud').connect('on_press', self.load_oud)
-		getWidgetById('button_clear').connect('on_press', self.reset)
-		getWidgetById('button_pause').connect('on_press', self.toggle_pause)
-		getWidgetById('button_game_of_life').connect('on_press', self.toggle_game_of_life)
-		getWidgetById('button_transpose_up').connect('on_press', self.transpose_up)
-		getWidgetById('button_transpose_down').connect('on_press', self.transpose_down)
-		getWidgetById('button_preset1').connect('on_press', self.preset1)
-		getWidgetById('button_preset2').connect('on_press', self.preset2)
-		getWidgetById('button_preset3').connect('on_press', self.preset3)
-		getWidgetById('button_preset4').connect('on_press', self.preset4)
-		getWidgetById('button_preset5').connect('on_press', self.preset5)
+		w.getById('slider_tempo').connect('on_value_change', self.update_bpm)
+		w.getById('button_kalimba').connect('on_press', self.load_kalimba)
+		w.getById('button_oud').connect('on_press', self.load_oud)
+		w.getById('button_clear').connect('on_press', self.reset)
+		w.getById('button_pause').connect('on_press', self.toggle_pause)
+		w.getById('button_game_of_life').connect('on_press', self.toggle_game_of_life)
+		w.getById('button_transpose_up').connect('on_press', self.transpose_up)
+		w.getById('button_transpose_down').connect('on_press', self.transpose_down)
+		w.getById('button_preset1').connect('on_press', self.preset1)
+		w.getById('button_preset2').connect('on_press', self.preset2)
+		w.getById('button_preset3').connect('on_press', self.preset3)
+		w.getById('button_preset4').connect('on_press', self.preset4)
+		w.getById('button_preset5').connect('on_press', self.preset5)
 		
 	def reset(self, *largs):
-		self.gridx = 16
-		self.gridy = 16
-		self.grid = [[0 for i in range(self.gridx)] for i in range(self.gridy)]
-		self.stepx = 1;
-		self.stepy = 1;
-		self.currentrow = 0;
+		self.currentcol = 0;
+		
+		for x in range(self.gridx):
+			for y in range(self.gridy):
+				self.matrix.matrix[x][y] = 0
+
 
 
 	def on_touch_down(self, touch):
@@ -122,52 +150,38 @@ class World(MTWidget):
 		if super(World, self).on_touch_down(touch):
 			return True
 		
-		for x in range(self.gridx):
-			#find x pad
-			if (touch.x >= (2+x)*self.stepx -10) and (touch.x <= (2+x)*self.stepx +10):
-				for y in range(self.gridy):
-					#find y pad
-					if (touch.y >= (2+y)*self.stepy -10) and (touch.y <= (2+y)*self.stepy +10):
-						self.grid[x][y] = 1 - self.grid[x][y]
-						return 1
 		return 0
 	
 	
 	def play(self,dt):
 		#we move
-		if self.currentrow < self.gridx - 1:
-			self.currentrow += 1
+		if self.currentcol < self.gridx - 1:
+			self.currentcol += 1
 		else:
-			self.currentrow = 0
+			self.currentcol = 0
 			#cellular evolution ?
 			if self.game_of_life:
 				self.process_game_of_life()
 		#we play
-		for i in range(self.gridy ):
-			if self.grid[self.currentrow][i] == 1:
+		for i in range(self.gridy):
+			if self.matrix.matrix[self.currentcol][i]:
 				self.sound[i].stop()
 				self.sound[i].play()
 
-		
-	def draw(self):
-		
+		# update button matrix
+		self.matrix.col = self.currentcol
+
+	def create_matrix(self):
+		self.matrix = MusicButtonMatrix(matrix_size=(self.gridx,self.gridy))
+		self.add_widget(self.matrix)
+
+	def on_update(self):
+		super(World, self).on_update()
 		w = self.get_parent_window()
-		
-		self.stepx = w.width / (self.gridx + 4)
-		self.stepy = w.height / (self.gridy + 4)
-		
-		#draw pads
-		for x in range(self.gridx):
-			for y in range(self.gridy):
-				if self.grid[x][y] == 1:
-					set_color(0.6,1,0.6, 1) #pushed
-				else:
-					set_color(0.98,0.98,0.89, 1) #free
-				drawCircle( ((2+x)*self.stepx  ,(2+y)*self.stepy), 20)
-		
-		#draw row played
-		set_color(1, 0, 0, .5)
-		drawRectangle( ((2+self.currentrow)*self.stepx-20 ,2*self.stepy-20), (40,self.gridy *self.stepy ))
+		if w:
+			v = Vector(w.size)
+			self.matrix.size = v * 0.8
+			self.matrix.pos = v * 0.1
 
 	def toggle_pause(self, *largs):
 		if self.paused:
@@ -189,7 +203,7 @@ class World(MTWidget):
 		original_grid= [[0 for i in range(self.gridx)] for i in range(self.gridy)]
 		for x in range(self.gridx):
 			for y in range(self.gridy):
-				original_grid[x][y] = self.grid[x][y]
+				original_grid[x][y] = self.matrix.matrix[x][y]
 		'''
 		1 2 3
 		4 X 5
@@ -228,29 +242,29 @@ class World(MTWidget):
 				count = count_neighbour(x,y)
 				#3 neighbours -> alive
 				if count == 3:
-					self.grid[x][y] = 1
+					self.matrix.matrix[x][y] = 1
 				#2 neighbours -> same state
 				elif count == 2:
 					pass
 				#dead
 				else:
-					self.grid[x][y] = 0
+					self.matrix.matrix[x][y] = 0
 
 	#move cells up
 	def transpose_up(self, *largs):
 		for x in range(self.gridx):
-			save = self.grid[x][self.gridy-1]
+			save = self.matrix.matrix[x][self.gridy-1]
 			for y in range(self.gridy-1,0,-1):
-				self.grid[x][y] = self.grid[x][y-1]
-			self.grid[x][0] = save
+				self.matrix.matrix[x][y] = self.matrix.matrix[x][y-1]
+			self.matrix.matrix[x][0] = save
 	
 	#move cells down
 	def transpose_down(self, *largs):
 		for x in range(self.gridx):
-			save = self.grid[x][0]
+			save = self.matrix.matrix[x][0]
 			for y in range(self.gridy-1):
-				self.grid[x][y] = self.grid[x][y+1]
-			self.grid[x][self.gridy-1] = save
+				self.matrix.matrix[x][y] = self.matrix.matrix[x][y+1]
+			self.matrix.matrix[x][self.gridy-1] = save
 
 	#change tempo
 	def update_bpm(self, bpm):
@@ -273,7 +287,7 @@ class World(MTWidget):
 				continue
 			for x in range(self.gridx):
 				if line[x] == '1':
-					self.grid[x][y] = 1
+					self.matrix.matrix[x][y] = 1
 			y -= 1
 
 		if 'instrument' in namespace:
@@ -310,14 +324,12 @@ class World(MTWidget):
 def pymt_plugin_activate(w, ctx):
 	ctx.c = World()
 	w.add_widget(ctx.c)
-	#bg = MTSvg(filename="fond.svg")
-	#w.add_widget(bg)
 
 def pymt_plugin_deactivate(w, ctx):
 	w.remove_widget(ctx.c)
 
 if __name__ == '__main__':
-	w = MTWindow( )
+	w = MTWindow()
 	ctx = MTContext()
 	pymt_plugin_activate(w, ctx)
 	runTouchApp()
