@@ -7,6 +7,8 @@ PLUGIN_DESCRIPTION = 'Play!'
 
 from pymt import *
 from MTMidiKeyboard import *
+from MTMidiInstrument import *
+from MTMidiArpeggiator import *
 import pygame.midi
 
 
@@ -25,24 +27,27 @@ class World(MTWidget):
 		self.device = pygame.midi.get_default_output_id()
 		print "Default is %s" % self.device
 		
-		self.midi_out = pygame.midi.Output(self.device)
-		self.midi_out.set_instrument(0, channel=0)		
-		self.midi_out.set_instrument(24, channel=1)	
-
-		self.piano = MTMidiKeyboard(pos=(100,100), size=(300,200), channel = 0, midiplay = self)
-		self.guitar  = MTMidiKeyboard(pos=(500,100), size=(300,200), channel = 1, midiplay = self)
+		midi_out = pygame.midi.Output(self.device)
+		#end midi init
 		
-		self.add_widget(self.piano)
-		self.add_widget(self.guitar)
+		i1 = MTMidiInstrument( pos=(100,400), size=(200,100), instrument=0, channel=0, midi_out = midi_out)
+		k1 = MTMidiKeyboard(   pos=(100,100), size=(300,200), output = i1)
 		
-		self.register_event_type('note_on')
-		self.register_event_type('note_off')
+		i2 = MTMidiInstrument( pos=(500,600), size=(200,100), instrument=87, channel=1, midi_out = midi_out)
+		ar = MTMidiArpeggiator(pos=(500,400), size=(200,100), sequence=4, output = i2)
+		k2 = MTMidiKeyboard(   pos=(500,100), size=(300,200), octave=1, output = ar)
+		
+		self.add_widget(k1)
+		self.add_widget(k2)
+		self.add_widget(i1)
+		self.add_widget(i2)
+		
 	
-	def note_on(self, channel, note):
-		self.midi_out.note_on(note,127,channel)
+	def note_on(self, id, note):
+		self.midi_out.note_on(note,127,id)
 	
-	def note_off(self, channel, note):
-		self.midi_out.note_off(note,127,channel)
+	def note_off(self, id, note):
+		self.midi_out.note_off(note,127,id)
 
 			
 

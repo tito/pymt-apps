@@ -1,10 +1,21 @@
 from pymt import *
 
+MIDI_ARPEGGIATOR_SEQ = [
+	{ 'name': 'octaver', 'sequence': [ 0, 12 ] },
+	{ 'name': 'third',   'sequence': [ 0, 4 ] },
+	{ 'name': 'fifth',   'sequence': [ 0, 7 ] },
+	{ 'name': 'major',   'sequence': [ 0, 4, 7 ] },
+	{ 'name': 'minor',   'sequence': [ 0, 3, 7 ] },
+]
+
 class MTMidiArpeggiator(MTDragable):
 	def __init__(self, **kwargs):
 		super(MTMidiArpeggiator, self).__init__(**kwargs)
 		
+		kwargs.setdefault('sequence', 0)
+		
 		self.output = kwargs['output']
+		self.sequence = kwargs['sequence']
 		
 		self.go = False
 		self.last_note = -1
@@ -33,13 +44,15 @@ class MTMidiArpeggiator(MTDragable):
 			self.output.dispatch_event('note_off', self.last_note)
 		
 		if(self.go):
-			if(self.index == 0):
-				self.output.dispatch_event('note_on', self.note)
-				self.last_note = self.note
-			else:	
-				self.output.dispatch_event('note_on', self.note+12)
-				self.last_note = self.note+12
-			self.index = 1 - self.index
+			s = MIDI_ARPEGGIATOR_SEQ[self.sequence]['sequence'][self.index]
+			if self.index < len(MIDI_ARPEGGIATOR_SEQ[self.sequence]['sequence']) -1:
+				self.index += 1
+			else:
+				self.index = 0
+			
+			self.output.dispatch_event('note_on', self.note+s)
+			self.last_note = self.note+s
+			
 
 	def draw(self):
 		#background

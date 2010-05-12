@@ -15,9 +15,11 @@ from pymt import *
 class MTMidiKeyboard(MTDragable):
 	def __init__(self, **kwargs):
 		super(MTMidiKeyboard, self).__init__(**kwargs)
-		
-		self.midiplay = kwargs['midiplay']
-		self.channel = kwargs['channel']
+
+		kwargs.setdefault('octave', 4)
+
+		self.output = kwargs['output']	 # object that will receive note_on &  note_off events
+		self.octave = kwargs['octave']
 		
 		self.color_white = (1,1,1,1)
 		self.color_black = (0,0,0,1)
@@ -26,18 +28,18 @@ class MTMidiKeyboard(MTDragable):
 		self.key_active = [0,0,0,0,0,0,0,0,0,0,0,0,0]
 		self.keyboard = [ 1, 4, 2, 4, 3, 0, 1 ,4 , 2, 4, 2, 4, 3 ]
 		self.keys_mask = [
-			{ 'note': 0,  'midi': 60, 'zone1': (0,3),   'zone2': (0,2) },	# C
-			{ 'note': 1,  'midi': 61, 'zone1': (0,0),   'zone2': (2,4) },	# C#
-			{ 'note': 2,  'midi': 62, 'zone1': (3,6),   'zone2': (4,5) },	# D
-			{ 'note': 3,  'midi': 63, 'zone1': (0,0),   'zone2': (5,7) },	# D#
-			{ 'note': 4,  'midi': 64, 'zone1': (6,9),   'zone2': (7,9) },	# E
-			{ 'note': 6,  'midi': 65, 'zone1': (9,12),  'zone2': (9,11) },	# F
-			{ 'note': 7,  'midi': 66, 'zone1': (0,0),   'zone2': (11,13) },	# F#
-			{ 'note': 8,  'midi': 67, 'zone1': (12,15), 'zone2': (13,14) },	# G
-			{ 'note': 9,  'midi': 68, 'zone1': (0,0),   'zone2': (14,16) },	# G#
-			{ 'note': 10, 'midi': 69, 'zone1': (15,18), 'zone2': (16,17) },	# A
-			{ 'note': 11, 'midi': 70, 'zone1': (0,0),   'zone2': (17,19) },	# A#
-			{ 'note': 12, 'midi': 71, 'zone1': (18,21), 'zone2': (19,21) },	# B
+			{ 'note': 0,  'midi':  0, 'zone1': (0,3),   'zone2': (0,2) },	# C
+			{ 'note': 1,  'midi':  1, 'zone1': (0,0),   'zone2': (2,4) },	# C#
+			{ 'note': 2,  'midi':  2, 'zone1': (3,6),   'zone2': (4,5) },	# D
+			{ 'note': 3,  'midi':  3, 'zone1': (0,0),   'zone2': (5,7) },	# D#
+			{ 'note': 4,  'midi':  4, 'zone1': (6,9),   'zone2': (7,9) },	# E
+			{ 'note': 6,  'midi':  5, 'zone1': (9,12),  'zone2': (9,11) },	# F
+			{ 'note': 7,  'midi':  6, 'zone1': (0,0),   'zone2': (11,13) },	# F#
+			{ 'note': 8,  'midi':  7, 'zone1': (12,15), 'zone2': (13,14) },	# G
+			{ 'note': 9,  'midi':  8, 'zone1': (0,0),   'zone2': (14,16) },	# G#
+			{ 'note': 10, 'midi':  9, 'zone1': (15,18), 'zone2': (16,17) },	# A
+			{ 'note': 11, 'midi': 10, 'zone1': (0,0),   'zone2': (17,19) },	# A#
+			{ 'note': 12, 'midi': 11, 'zone1': (18,21), 'zone2': (19,21) },	# B
 		]
 
 	def on_touch_down(self, touch):
@@ -65,17 +67,17 @@ class MTMidiKeyboard(MTDragable):
 			if y >= self.y + step_y and y < self.y + 4.0*step_y	and x >= self.x + step_x + mask['zone1'][0]*step_x and x <  self.x + step_x + mask['zone1'][1]*step_x:
 				self.key_active[mask['note']] = state
 				if state == 1:
-					self.midiplay.dispatch_event('note_on', self.channel, mask['midi'])
+					self.output.dispatch_event('note_on', mask['midi']+12+self.octave*12)
 				else:
-					self.midiplay.dispatch_event('note_off', self.channel, mask['midi'])
+					self.output.dispatch_event('note_off', mask['midi']+12+self.octave*12)
 			
 			#zone2
 			if y >= self.y + 4.0*step_y and y < self.y + 8.0*step_y	and x >= self.x + step_x + mask['zone2'][0]*step_x and x <  self.x + step_x + mask['zone2'][1]*step_x:
 				self.key_active[mask['note']] = state
 				if state == 1:
-					self.midiplay.dispatch_event('note_on', self.channel, mask['midi'])
+					self.output.dispatch_event('note_on', mask['midi']+12+self.octave*12)
 				else:
-					self.midiplay.dispatch_event('note_off', self.channel, mask['midi'])
+					self.output.dispatch_event('note_off', mask['midi']+12+self.octave*12)
 		
 		return 0
 

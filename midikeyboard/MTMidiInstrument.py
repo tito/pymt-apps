@@ -162,8 +162,11 @@ class MTMidiInstrument(MTDragable):
 		self.register_event_type('note_on')
 		self.register_event_type('note_off')
 		
-		b = MTButton(label=MIDI_instruments[self.instrument])
-		self.add_widget(b)
+		a = MTAnchorLayout(size=self.size, pos=self.pos)
+		self.button = MTButton(label=MIDI_instruments[self.instrument], size=(180,80))
+		self.button.connect('on_press', self.open_choose_instrument)
+		a.add_widget(self.button)
+		self.add_widget(a)
 		
 	
 	def note_on(self, note):
@@ -180,3 +183,25 @@ class MTMidiInstrument(MTDragable):
 			size = self.size,
 			radius = 10
 		)
+
+	def open_choose_instrument(self,*largs):
+		print "la"
+		w = self.get_parent_window()
+		m = MTModalWindow()
+		a = MTAnchorLayout(size=w.size)
+		k = MTKineticList(size=(400, 500), searchable=False,
+						  deletable=False)
+
+		def choose_instrument(item, name, num):
+			w.remove_widget(m)
+			self.instrument = num
+			self.button.label = name
+			self.midi_out.set_instrument(self.instrument, channel=self.channel)
+
+		for x in MIDI_instruments:
+			item = MTKineticItem(label=x, size=(400, 25))
+			item.connect('on_press', curry(choose_instrument, item, x))
+			k.add_widget(item)
+		a.add_widget(k)
+		m.add_widget(a)
+		w.add_widget(m)
