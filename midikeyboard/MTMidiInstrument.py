@@ -149,10 +149,11 @@ MIDI_instruments = [
 ]
 
 
-class MTMidiInstrument(MTDragable):
+class MTMidiInstrument(MTScatterWidget):
 	def __init__(self, **kwargs):
 		super(MTMidiInstrument, self).__init__(**kwargs)
-		
+		self.do_scale=False
+		self.do_rotation=False
 		self.channel = kwargs['channel']
 		self.midi_out = kwargs['midi_out']
 		self.instrument = kwargs['instrument']
@@ -162,7 +163,7 @@ class MTMidiInstrument(MTDragable):
 		self.register_event_type('note_on')
 		self.register_event_type('note_off')
 		
-		a = MTAnchorLayout(size=self.size, pos=self.pos)
+		a = MTAnchorLayout(size=self.size, pos=(0,0))
 		self.button = MTButton(label=MIDI_instruments[self.instrument], size=(180,80))
 		self.button.connect('on_press', self.open_choose_instrument)
 		a.add_widget(self.button)
@@ -179,22 +180,21 @@ class MTMidiInstrument(MTDragable):
 		#background
 		set_color(0.6,0.6,0.6, 1)
 		drawRoundedRectangle(
-			pos = self.pos,
+			pos = (0,0),
 			size = self.size,
 			radius = 10
 		)
 
 	def open_choose_instrument(self,*largs):
-		print "la"
 		w = self.get_parent_window()
 		m = MTModalWindow()
 		a = MTAnchorLayout(size=w.size)
 		k = MTKineticList(size=(400, 500), searchable=False,
-						  deletable=False)
+						  deletable=False, title="Instrument")
 
-		def choose_instrument(item, name, num):
+		def choose_instrument(item, name, *largs):
 			w.remove_widget(m)
-			self.instrument = num
+			self.instrument = MIDI_instruments.index(name)
 			self.button.label = name
 			self.midi_out.set_instrument(self.instrument, channel=self.channel)
 

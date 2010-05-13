@@ -41,13 +41,8 @@ class World(MTWidget):
 		self.add_widget(k2)
 		self.add_widget(i1)
 		self.add_widget(i2)
-		
+		self.add_widget(ar)
 	
-	def note_on(self, id, note):
-		self.midi_out.note_on(note,127,id)
-	
-	def note_off(self, id, note):
-		self.midi_out.note_off(note,127,id)
 
 			
 

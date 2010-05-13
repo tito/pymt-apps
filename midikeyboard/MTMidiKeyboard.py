@@ -12,9 +12,12 @@ from pymt import *
   0 1 2 3 4 5 6 7 8 9 ...
 '''
 
-class MTMidiKeyboard(MTDragable):
+class MTMidiKeyboard(MTScatterWidget):
 	def __init__(self, **kwargs):
 		super(MTMidiKeyboard, self).__init__(**kwargs)
+
+		self.do_rotation = False
+		self.do_scale = False
 
 		kwargs.setdefault('octave', 4)
 
@@ -44,19 +47,22 @@ class MTMidiKeyboard(MTDragable):
 
 	def on_touch_down(self, touch):
 		
-		#other widgets
-		if super(MTMidiKeyboard, self).on_touch_down(touch):
-			return True
-
-		self.test_mask(touch.x,touch.y,1)
+		x = touch.x - self.x + self.width/2.0
+		y = touch.y - self.y + self.height/2.0
+		
+		if not self.test_mask(x,y, 1):
+			#other widgets
+			if super(MTMidiKeyboard, self).on_touch_down(touch):
+				return True
 	
 	def on_touch_up(self, touch):
-		
-		#other widgets
-		if super(MTMidiKeyboard, self).on_touch_down(touch):
-			return True
+		x = touch.x - self.x + self.width/2.0
+		y = touch.y - self.y + self.height/2.0
 
-		self.test_mask(touch.x,touch.y,0)
+		if not self.test_mask(x,y, 0):
+			#other widgets
+			if super(MTMidiKeyboard, self).on_touch_up(touch):
+				return True
 		
 	def test_mask(self, x, y, state):
 		step_x = self.width / 23.0
@@ -64,22 +70,24 @@ class MTMidiKeyboard(MTDragable):
 		
 		for mask in self.keys_mask:
 			#zone1
-			if y >= self.y + step_y and y < self.y + 4.0*step_y	and x >= self.x + step_x + mask['zone1'][0]*step_x and x <  self.x + step_x + mask['zone1'][1]*step_x:
+			if y >= step_y and y < 4.0*step_y	and x >= step_x + mask['zone1'][0]*step_x and x <  step_x + mask['zone1'][1]*step_x:
 				self.key_active[mask['note']] = state
 				if state == 1:
 					self.output.dispatch_event('note_on', mask['midi']+12+self.octave*12)
 				else:
 					self.output.dispatch_event('note_off', mask['midi']+12+self.octave*12)
+				return True
 			
 			#zone2
-			if y >= self.y + 4.0*step_y and y < self.y + 8.0*step_y	and x >= self.x + step_x + mask['zone2'][0]*step_x and x <  self.x + step_x + mask['zone2'][1]*step_x:
+			if y >= 4.0*step_y and y < 8.0*step_y	and x >= step_x + mask['zone2'][0]*step_x and x <  step_x + mask['zone2'][1]*step_x:
 				self.key_active[mask['note']] = state
 				if state == 1:
 					self.output.dispatch_event('note_on', mask['midi']+12+self.octave*12)
 				else:
 					self.output.dispatch_event('note_off', mask['midi']+12+self.octave*12)
+				return True
 		
-		return 0
+		return False
 
 	'''
 	    w2=2x
@@ -110,13 +118,13 @@ class MTMidiKeyboard(MTDragable):
 		#background
 		set_color(0.6,0.6,0.6, 1)
 		drawRoundedRectangle(
-			pos = self.pos,
+			pos = (0,0),
 			size = self.size,
 			radius = 10
 		)
 		
-		pos_x = self.x + step_x
-		pos_y = self.y + step_y
+		pos_x = step_x
+		pos_y = step_y
 		
 		for i in range(len(self.keyboard)):
 			key = self.keyboard[i]
