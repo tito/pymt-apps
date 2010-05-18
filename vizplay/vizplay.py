@@ -353,13 +353,18 @@ class VizScenarioSmoke(MTWidget):
 
 
     def on_update(self):
-        x = 0
         w = self.w
         p = self.pixels
         z = self.z
         z2 = self.z / 2.
         wf = float(self.w)
+        t = self.t
         noise = self.noise
+        self.t += getFrameDt() / 2.
+
+        if vizfast:
+            return vizfast.smokeUpdate(w, p, z, z2, wf, t)
+
         for x in xrange(w * w):
             X = ((x % w) / wf) * z - z2
             Y = ((x / w) / wf) * z - z2
@@ -367,7 +372,6 @@ class VizScenarioSmoke(MTWidget):
             p[x*3] = cl
             p[x*3+1] = cl
             p[x*3+2] = min(255, cl * 2)
-        self.t += getFrameDt() / 2.
 
     def on_touch_move(self, touch):
         self.t += touch.sx - 0.5
@@ -462,6 +466,10 @@ class VizScenarioPlasma(MTWidget):
         pixels = self.pixels
         luma = self.luma
         w = self.w
+
+        if vizfast:
+            return vizfast.plasmaUpdate(pos, cWaves, wave, wave2, pixels, luma, w)
+
         for ix in xrange(2):
             for iy in xrange(2):
                 for iz in xrange(3):
@@ -605,6 +613,13 @@ class VizPlay(MTWidget):
                   font_size=42,
                   color=(.8, .8, 1, .4),
                   pos=(ww - 30, 25))
+
+        # draw FPS
+        drawLabel(label='%.2f' % getClock().get_fps(),
+                  font_size=20,
+                  color=(.8, .8, .8, .4),
+                  pos=(10, wh - 36),
+                  center=False)
 
 
         # out
