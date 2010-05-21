@@ -199,7 +199,7 @@ class MTMidiInstrument(MTScatterWidget):
 			self.midi_out.set_instrument(self.instrument, channel=self.channel)
 
 		for x in MIDI_instruments:
-			item = MTKineticItem(label=x, size=(400, 25))
+			item = MTKineticItem(label=x, size=(400, 50))
 			item.connect('on_press', curry(choose_instrument, item, x))
 			k.add_widget(item)
 		a.add_widget(k)
