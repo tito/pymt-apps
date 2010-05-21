@@ -102,7 +102,7 @@ class MTMidiArpeggiator(MTScatterWidget):
 
 		num = 0
 		for x in MIDI_ARPEGGIATOR_SEQ:
-			item = MTKineticItem(label=x['name'], size=(400, 25))
+			item = MTKineticItem(label=x['name'], size=(400, 50))
 			item.connect('on_press', curry(choose_instrument, num, x['name']))
 			k.add_widget(item)
 			num += 1
