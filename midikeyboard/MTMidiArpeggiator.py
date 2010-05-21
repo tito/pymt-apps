@@ -103,6 +103,7 @@ class MTMidiArpeggiator(MTScatterWidget):
 			w.remove_widget(m)
 			self.sequence = num
 			self.button.label = name
+			self.index = 0
 
 		num = 0
 		for x in MIDI_ARPEGGIATOR_SEQ:
