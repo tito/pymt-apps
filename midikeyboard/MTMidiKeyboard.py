@@ -17,7 +17,7 @@ class MTMidiKeyboard(MTScatterWidget):
 		super(MTMidiKeyboard, self).__init__(**kwargs)
 
 		self.do_rotation = False
-		self.do_scale = False
+		self.do_scale = True
 
 		kwargs.setdefault('octave', 4)
 

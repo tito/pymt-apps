@@ -7,6 +7,7 @@ MIDI_ARPEGGIATOR_SEQ = [
 	{ 'name': 'fifth',   'sequence': [ 0, 7 ] },
 	{ 'name': 'major',   'sequence': [ 0, 4, 7 ] },
 	{ 'name': 'minor',   'sequence': [ 0, 3, 7 ] },
+	{ 'name': 'popcorn', 'sequence': [ 0, -2, 0, -5, -9, -5, -12, 's' ] }
 ]
 
 class MTMidiArpeggiator(MTScatterWidget):
@@ -62,7 +63,7 @@ class MTMidiArpeggiator(MTScatterWidget):
 
 	def play(self, dt):
 		#end of the preceding sequence note
-		if self.last_note > 0:
+		if self.last_note > 0 and self.last_note != 's':
 			self.output.dispatch_event('note_off', self.last_note)
 		
 		if(self.go):
@@ -75,8 +76,11 @@ class MTMidiArpeggiator(MTScatterWidget):
 				else:
 					self.index = 0
 			
-			self.output.dispatch_event('note_on', self.note+s)
-			self.last_note = self.note+s
+			if s != 's':
+				self.output.dispatch_event('note_on', self.note+s)
+				self.last_note = self.note+s
+			else:
+				self.last_note = 's'
 			
 
 	def draw(self):

@@ -30,18 +30,20 @@ class World(MTWidget):
 		midi_out = pygame.midi.Output(self.device)
 		#end midi init
 		
-		i1 = MTMidiInstrument( pos=(100,400), size=(200,100), instrument=0, channel=0, midi_out = midi_out)
-		k1 = MTMidiKeyboard(   pos=(100,100), size=(300,200), output = i1)
+		i1 = MTMidiInstrument( pos=(100,600), size=(200,100), instrument=12, channel=0, midi_out = midi_out)
+		a1 = MTMidiArpeggiator(pos=(100,400), size=(200,100), sequence=5, output = i1)
+		k1 = MTMidiKeyboard(   pos=(100,100), size=(300,200), output = a1)
 		
 		i2 = MTMidiInstrument( pos=(500,600), size=(200,100), instrument=87, channel=1, midi_out = midi_out)
-		ar = MTMidiArpeggiator(pos=(500,400), size=(200,100), sequence=4, output = i2)
-		k2 = MTMidiKeyboard(   pos=(500,100), size=(300,200), octave=1, output = ar)
+		a2 = MTMidiArpeggiator(pos=(500,400), size=(200,100), sequence=4, output = i2)
+		k2 = MTMidiKeyboard(   pos=(500,100), size=(300,200), octave=1, output = a2)
 		
 		self.add_widget(k1)
 		self.add_widget(k2)
 		self.add_widget(i1)
 		self.add_widget(i2)
-		self.add_widget(ar)
+		self.add_widget(a1)
+		self.add_widget(a2)
 	
 
 			
