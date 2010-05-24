@@ -7,6 +7,7 @@ MIDI_ARPEGGIATOR_SEQ = [
 	{ 'name': 'fifth',   'sequence': [ 0, 7 ] },
 	{ 'name': 'major',   'sequence': [ 0, 4, 7 ] },
 	{ 'name': 'minor',   'sequence': [ 0, 3, 7 ] },
+	{ 'name': 'popcorn', 'sequence': [ 0, -2, 0, -5, -9, -5, -12, 's' ] }
 ]
 
 class MTMidiArpeggiator(MTScatterWidget):
@@ -62,7 +63,7 @@ class MTMidiArpeggiator(MTScatterWidget):
 
 	def play(self, dt):
 		#end of the preceding sequence note
-		if self.last_note > 0:
+		if self.last_note > 0 and self.last_note != 's':
 			self.output.dispatch_event('note_off', self.last_note)
 		
 		if(self.go):
@@ -75,8 +76,11 @@ class MTMidiArpeggiator(MTScatterWidget):
 				else:
 					self.index = 0
 			
-			self.output.dispatch_event('note_on', self.note+s)
-			self.last_note = self.note+s
+			if s != 's':
+				self.output.dispatch_event('note_on', self.note+s)
+				self.last_note = self.note+s
+			else:
+				self.last_note = 's'
 			
 
 	def draw(self):
@@ -99,10 +103,11 @@ class MTMidiArpeggiator(MTScatterWidget):
 			w.remove_widget(m)
 			self.sequence = num
 			self.button.label = name
+			self.index = 0
 
 		num = 0
 		for x in MIDI_ARPEGGIATOR_SEQ:
-			item = MTKineticItem(label=x['name'], size=(400, 25))
+			item = MTKineticItem(label=x['name'], size=(400, 50))
 			item.connect('on_press', curry(choose_instrument, num, x['name']))
 			k.add_widget(item)
 			num += 1
