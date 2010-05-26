@@ -9,7 +9,7 @@ PLUGIN_DESCRIPTION = 'Untangle game !'
 
 from pymt import *
 from graph import *
-from pyglet import *
+from OpenGL.GL import *
 
 import time
 import pickle

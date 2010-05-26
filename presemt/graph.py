@@ -1,6 +1,7 @@
 from __future__ import with_statement
 from random import randint
-from pyglet.gl import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 from pymt import *
 
@@ -47,11 +48,11 @@ class Graph:
                      x = randint(100,displaySize[0]-100)*1.0
                      y = randint(100,displaySize[1]-100)*1.0
                      self.verts.append([x,y])
-              
+
               self.edges = [ [self.verts[i], self.verts[(i+1)%num_verts]] for i in range(num_verts) ]
               self.collisions = []
               self.is_solved()
-              
+
        def is_solved(self):
               self.collisions = []
               for e1 in self.edges:
@@ -67,7 +68,7 @@ class Graph:
                                        point_inside_line_segment(intersection, p3,p4)):
                                           self.collisions.append(intersection)
               return len(self.collisions) == 0
-     
+
        def draw(self):
               #self.is_solved()
               for e in self.edges:
@@ -79,7 +80,7 @@ class Graph:
                      drawVertex(v[0],v[1])
               for c in self.collisions:
                      drawCollision(c.x,c.y)
-                     
+
        #returns the vertex at the position, None if no vertex there
        def collideVerts(self, x,y, regionSize=40):
               for v in self.verts:

@@ -1,8 +1,8 @@
 from pymt import *
-from pyglet.gl import *
+from OpenGL.GL import *
 
 class SlideTransition(MTWidget):
-    
+
     def __init__(self, presentation, src, dest, **kwargs):
         super(SlideTransition, self).__init__(**kwargs)
         self.presentation = presentation
@@ -15,13 +15,13 @@ class SlideTransition(MTWidget):
         with self.src_fbo:
             glClear(GL_COLOR_BUFFER_BIT)
             self.src.on_draw()
-        
+
         self.dest_fbo = Fbo(size=(self.presentation.width, self.presentation.height))
         with self.dest_fbo:
             glClear(GL_COLOR_BUFFER_BIT)
             self.dest.on_draw()
-        
-        
+
+
     def draw(self):
         if self.progress < 1.0:
             with gx_matrix:

@@ -1,0 +1,19 @@
+additemmenu,
+.btnsave,
+bookmarkbar {
+	draw-background: 1;
+	bg-color: rgba(127, 127, 127, 127);
+}
+
+.slide-textinput,
+presemtbutton {
+	draw-background: 0;
+	draw-alpha-background: 0;
+	draw-border: 0;
+	draw-background-down: 1;
+}
+
+.slide-textinput {
+	font-size: 40;
+	draw-background: 0;
+}
