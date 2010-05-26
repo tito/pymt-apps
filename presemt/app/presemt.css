@@ -1,3 +1,11 @@
+presemt {
+	bg-color: rgb(240, 240, 240);
+}
+
+slidecontainer {
+	grid-color: rgb(210, 210, 210);
+}
+
 additemmenu,
 .btnsave,
 bookmarkbar {
