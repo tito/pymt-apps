@@ -8,7 +8,8 @@ class SlideVideo(SlideItem):
         self._filename = ''
         self.video = None
         self.locked = False
-        self.filename = 'content/softboy.avi'
+        if self.restoremode is False:
+            self.filename = 'content/softboy.avi'
 
     def _get_filename(self):
         return self._filename
@@ -33,19 +34,19 @@ class SlideVideo(SlideItem):
 
     def on_touch_down(self, touch):
         if self.ctx.mode == 'edit' and self.collide_point(*touch.pos):
-            fb = MTFileBrowser(pos=(100,100), filters=(
+            self.ctx.open_filebrowser(self.load_file, [
+                '.*\.[Mm][Pp]4$',
+                '.*\.[Mm][Oo][Vv]$',
                 '.*\.[Aa][Vv][Ii]$',
                 '.*\.[Mm][Pp][Gg]$',
                 '.*\.[Mm][Pp][Ee][Gg]$',
                 '.*\.[Mm][Kk][Vv]$'
-            ))
-            fb.push_handlers(on_select=self.load_file)
-            self.get_root_window().add_widget(fb)
+            ])
             return True
         return super(SlideVideo, self).on_touch_down(touch)
 
-    def load_file(self, files):
-        self.filename = files[0]
+    def load_file(self, filename):
+        self.filename = filename
 
     def _get_state(self):
         d = super(SlideVideo, self)._get_state()

@@ -23,6 +23,8 @@ class Presemt(MTWidget):
         self.dirty = True
         self.filename = None
         self._mode = 'layout'
+        self._filebrowser = None
+        self._filebrowser_cb = None
         self.current_bookmark = None
         self.interpolation = 0.0
         self.create_ui()
@@ -30,6 +32,45 @@ class Presemt(MTWidget):
     @staticmethod
     def register_slide_class(type_factory):
         Presemt.slide_class.append(type_factory)
+
+    def _filebrowser_select(self, files, *largs):
+        if self._filebrowser_cb is None:
+            return
+        if not len(files):
+            return
+        filename = files[0]
+        if os.path.isdir(filename):
+            return
+        self._filebrowser_cb(filename)
+
+    def _filebrowser_touch(self, touch):
+        if not self._filebrowser.collide_point(*touch.pos):
+            self.close_filebrowser()
+
+    def is_filebrowser_open(self):
+        if self._filebrowser is None:
+            return False
+        return self._filebrowser in self.children
+
+    def close_filebrowser(self):
+        if self._filebrowser is None:
+            return
+        self.remove_widget(self._filebrowser)
+        self._filebrowser_cb = None
+
+    def open_filebrowser(self, callback, filters=[]):
+        if self._filebrowser is None:
+            self._filebrowser = MTFileBrowserView(pos=(0, 80),
+                    size=(350, getWindow().height - 160))
+            self._filebrowser.path = '.'
+            self._filebrowser.connect('on_selection_change', self._filebrowser_select)
+            self._filebrowser.connect('on_touch_down', self._filebrowser_touch)
+        self.remove_widget(self._filebrowser)
+        self.add_widget(self._filebrowser)
+        self._filebrowser.filters = filters
+        self._filebrowser_cb = callback
+        self._filebrowser.update()
+        return self._filebrowser
 
     def draw(self):
         set_color(*self.style.get('bg-color'))
@@ -201,7 +242,7 @@ class Presemt(MTWidget):
             slide = None
             for slide_class in Presemt.slide_class:
                 if slide_class.name == name:
-                    slide = slide_class(self)
+                    slide = slide_class(self, restoremode=True)
             if slide is None:
                 print 'Unable to found Slide with name = ', name
                 continue

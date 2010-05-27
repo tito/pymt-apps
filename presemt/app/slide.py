@@ -24,9 +24,11 @@ class EditProxy(MTWidget):
 class SlideItem(MTScatterWidget):
     name = 'generic'
     def __init__(self, ctx, **kwargs):
+        kwargs.setdefault('restoremode', False)
         self.ctx = ctx
         self.locked = True
         self.proxy = EditProxy(self.ctx)
+        self.restoremode = kwargs.get('restoremode')
         super(SlideItem, self).__init__(**kwargs)
         super(SlideItem, self).add_widget(self.proxy)
 

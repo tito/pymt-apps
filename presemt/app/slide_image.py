@@ -1,6 +1,6 @@
 __all__ = ('SlideImage', )
 
-from pymt import Image, MTFileBrowser
+from pymt import Image, MTFileBrowser, Loader
 from slide import SlideItem
 
 class SlideImage(SlideItem):
@@ -9,7 +9,9 @@ class SlideImage(SlideItem):
         super(SlideImage, self).__init__(*largs, **kwargs)
         self._filename = ''
         self.image = None
-        self.filename = 'content/1.png'
+        self.image_loaded = False
+        if self.restoremode is False:
+            self.filename = 'content/1.png'
         self.fb = None
 
     def _get_filename(self):
@@ -17,35 +19,40 @@ class SlideImage(SlideItem):
     def _set_filename(self, filename):
         self._filename = self.clean_filename(filename)
         try:
-            self.image = Image(self._filename)
+            self.image_loaded = False
+            self.image = Loader.image(self._filename)
+            if self.image.loaded is False:
+                self.image.connect('on_load', self._image_on_load)
+            else:
+                self._image_on_load()
             self.ctx.set_dirty()
         except:
-            pass
-        self.width = (self.image.width / float(self.image.height)) * self.height
+            raise
     filename = property(_get_filename, _set_filename)
+
+    def _image_on_load(self, *largs):
+        self.image_loaded = True
+        self.width = (self.image.width / float(self.image.height)) * self.height
 
     def draw(self):
         super(SlideImage, self).draw()
-        self.image.size = self.size
-        self.image.draw()
+        if self.image:
+            self.image.size = self.size
+            self.image.draw()
 
     def on_touch_down(self, touch):
         if self.ctx.mode == 'edit' and self.collide_point(*touch.pos):
-            if self.fb is None:
-                self.fb = MTFileBrowser(pos =(100,100), filters=(
-                    '.*\.[Pp][Nn][Gg]$',
-                    '.*\.[Jj][Pp][Gg]$',
-                    '.*\.[Jj][Pp][Ee][Gg]$',
-                ))
-                self.fb.push_handlers(on_select=self.load_file)
-            self.get_root_window().remove_widget(self.fb)
-            self.get_root_window().add_widget(self.fb)
+            self.ctx.open_filebrowser(self.load_file, (
+                '.*\.[Pp][Nn][Gg]$',
+                '.*\.[Jj][Pp][Gg]$',
+                '.*\.[Jj][Pp][Ee][Gg]$',
+            ))
             return True
         else:
             return super(SlideImage, self).on_touch_down(touch)
 
-    def load_file(self, files):
-        self.filename = files[0]
+    def load_file(self, filename):
+        self.filename = filename
 
     def _get_state(self):
         d = super(SlideImage, self)._get_state()
