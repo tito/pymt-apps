@@ -13,7 +13,7 @@ class SlideVideo(SlideItem):
     def _get_filename(self):
         return self._filename
     def _set_filename(self, filename):
-        self._filename = filename
+        self._filename = self.clean_filename(filename)
         try:
             if self.video:
                 self.remove_widget(self.video)

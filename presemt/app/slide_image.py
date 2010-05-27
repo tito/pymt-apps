@@ -1,6 +1,7 @@
+__all__ = ('SlideImage', )
+
 from pymt import Image, MTFileBrowser
 from slide import SlideItem
-
 
 class SlideImage(SlideItem):
     name = 'image'
@@ -14,7 +15,7 @@ class SlideImage(SlideItem):
     def _get_filename(self):
         return self._filename
     def _set_filename(self, filename):
-        self._filename = filename
+        self._filename = self.clean_filename(filename)
         try:
             self.image = Image(self._filename)
             self.ctx.set_dirty()

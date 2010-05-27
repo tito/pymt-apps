@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 if __name__ == '__main__':
 
     import sys
+    from pymt import runTouchApp, getWindow
 
     if len(sys.argv) != 2:
         print
@@ -34,7 +35,6 @@ if __name__ == '__main__':
 
 
     from app import Presemt
-    from pymt import runTouchApp, getWindow
 
     m = Presemt(size=getWindow().size)
     m.load(sys.argv[1])

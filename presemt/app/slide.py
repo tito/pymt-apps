@@ -1,7 +1,7 @@
-import numpy
-from pymt import MTWidget, MTScatterWidget, set_color, drawRectangle, matrix_mult
-from StringIO import StringIO
-from base64 import b64encode, b64decode
+__all__ = ('Slide', )
+
+import os
+from pymt import MTWidget, MTScatterWidget, set_color, drawRectangle
 
 class EditProxy(MTWidget):
     def __init__(self, ctx, **kwargs):
@@ -37,6 +37,14 @@ class SlideItem(MTScatterWidget):
     def _set_state(self, state):
         self.locked = state.get('locked')
         super(SlideItem, self)._set_state(state.get('matrix'))
+
+    def clean_filename(self, filename):
+        # strip the curdir if possible
+        curdir = os.path.realpath(os.path.curdir) + os.path.sep
+        if filename.startswith(curdir):
+            filename = filename[len(curdir):]
+        # make it crossplatform
+        return filename.replace(os.path.sep, '/')
 
     def add_widget(self, widget, front=True):
         self.proxy.add_widget(widget, front)
