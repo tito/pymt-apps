@@ -30,7 +30,6 @@ class MTMidiArpeggiator(MTScatterWidget):
 		
 		self.register_event_type('note_on')
 		self.register_event_type('note_off')
-		self.register_event_type('on_check')
 		
 		l = MTBoxLayout(size=self.size, pos=(10,10))
 		
