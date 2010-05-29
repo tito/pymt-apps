@@ -25,12 +25,18 @@ class SlideItem(MTScatterWidget):
     name = 'generic'
     def __init__(self, ctx, **kwargs):
         kwargs.setdefault('restoremode', False)
+        self.do_draw = False
         self.ctx = ctx
         self.locked = True
         self.proxy = EditProxy(self.ctx)
         self.restoremode = kwargs.get('restoremode')
         super(SlideItem, self).__init__(**kwargs)
         super(SlideItem, self).add_widget(self.proxy)
+
+    @property
+    def circle(self):
+        x, y = self.center
+        return x, y, max(self.width, self.height)
 
     def _get_state(self):
         return { 'matrix': super(SlideItem, self)._get_state(),

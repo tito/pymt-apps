@@ -1,7 +1,7 @@
 __all__ = ('SlideContainer', )
 
 from os import path
-from pymt import MTScatterPlane, set_color, drawLine, set_brush, gx_matrix
+from pymt import MTScatterPlane, set_color, drawLine, set_brush, gx_matrix, getWindow
 from array import array
 from OpenGL.GL import *
 from OpenGL.arrays import vbo
@@ -34,10 +34,28 @@ class SlideContainer(MTScatterPlane):
             glDrawArrays(GL_LINES, 0, self.lcount)
         glDisableClientState(GL_VERTEX_ARRAY)
 
+    def on_update(self):
+        scale = self.scale
+        w, h = getWindow().size
+        for child in self.children[:]:
+            x, y, r = child.circle
+            x, y = self.to_parent(x, y)
+            r *= self.scale
+            if x+r < 0 or x-r > w or y+r < 0 or y-r > h:
+                child.do_draw = False
+                continue
+            else:
+                child.do_draw = True
+            child.dispatch_event('on_update')
+        self.draw()
+
     def on_draw(self):
-        super(SlideContainer, self).on_draw()
+        w, h = getWindow().size
         with gx_matrix:
             glMultMatrixf(self.transform_mat)
+            self.draw()
+            for child in [x for x in self.children if x.do_draw]:
+                child.dispatch_event('on_draw')
             glLineWidth(3)
             set_color(0, 0, 0, .8)
             for x in self.linepen:
@@ -51,6 +69,7 @@ class SlideContainer(MTScatterPlane):
             self.linepen.append(list(self.to_local(*touch.pos)))
             return True
         return super(SlideContainer, self).on_touch_down(touch)
+
     def on_touch_move(self, touch):
         if self.ctx.mode == 'live' and touch.device == 'wm_pen':
             if len(self.linepen):
