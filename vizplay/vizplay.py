@@ -50,7 +50,6 @@ class VizScenarioWater(MTWidget):
     title = 'Water'
     author = 'Remi'
     
-    
     def __init__(self, **kwargs):
         super(VizScenarioWater, self).__init__(**kwargs)
         
@@ -61,10 +60,7 @@ class VizScenarioWater(MTWidget):
         self.w = 300 # dimensions of the texture
         self.h = 194
 
-        
-        self.waves = [0,1]
-        self.waves[0] = [[ 0 for x in range(self.h)] for y in range(self.w)]
-        self.waves[1] = [[ 0 for x in range(self.h)] for y in range(self.w)]
+        self.waves = list(0 for x in range(2 * self.w * self.h))
         
         self.render = array('B', '\x00' * self.w * self.h * 3)
         self.texture = Texture.create(self.w, self.h, format=GL_RGB)
@@ -73,7 +69,7 @@ class VizScenarioWater(MTWidget):
         #self.bpp=3
         #self.bg = Image.load(os.path.join(os.path.dirname(__file__), 'ressource/back.jpg'), keep_data=True)
         
-        #extract colour component
+        #extract colour components
         self.r = list('\x00' * self.w * self.h)
         self.g = list('\x00' * self.w * self.h)
         self.b = list('\x00' * self.w * self.h)
@@ -106,7 +102,7 @@ class VizScenarioWater(MTWidget):
                 dist = sqrt( (X - x)*(X - x) + (Y - y)*(Y - y))
                 if dist < self.radius:
                     if x > 0 and x < self.w -1 and y > 0 and y < self.h -1:
-                        self.waves[self.currentWave][x][y] = int ((255 - (512 * (1 - dist) / self.radius))/2);
+                        self.waves[self.currentWave*self.w*self.h+x+y*self.w] = int ((255 - (512 * (1 - dist) / self.radius))/2);
 
     def draw(self):
 
@@ -115,31 +111,31 @@ class VizScenarioWater(MTWidget):
                               self.previousWave, self.damping)
         else:
             #update the waves
-            for y in range(1,self.h -1):
-                for x in range(1,self.w -1):
-                    self.waves[self.currentWave][x][y] = int((( 
-                        self.waves[self.previousWave][x-1][y] + 
-                        self.waves[self.previousWave][x+1][y] +
-                        self.waves[self.previousWave][x][y-1] +
-                        self.waves[self.previousWave][x][y+1] ) / 2 -
-                        self.waves[self.currentWave][x][y])*self.damping)
+            for y in range(1, self.h-1):
+                for x in range(1, self.w-1):
+                    self.waves[self.currentWave*self.w*self.h+x+y*self.w] = int((( 
+                        self.waves[self.previousWave*self.w*self.h + x-1 +     y*self.w] + 
+                        self.waves[self.previousWave*self.w*self.h + x+1 +     y*self.w] +
+                        self.waves[self.previousWave*self.w*self.h + x   + (y-1)*self.w] +
+                        self.waves[self.previousWave*self.w*self.h + x   + (y+1)*self.w] ) / 2 -
+                        self.waves[self.currentWave*self.w*self.h  + x   +     y*self.w] ) * self.damping)
         
         #draw the image
         if vizfast:
             vizfast.waterDraw(self.w, self.h, self.waves, self.currentWave,
                           self.r, self.g, self.b, self.render)
         else:
-            for y in range(1,self.h -1):
-                for x in range(1,self.w -1):
+            for y in range(1, self.h-1):
+                for x in range(1, self.w-1):
                     
-                    Xoffset = (self.waves[self.currentWave][x-1][y] - self.waves[self.currentWave][x+1][y])/40
-                    Yoffset = (self.waves[self.currentWave][x][y-1] - self.waves[self.currentWave][x][y+1])/40
+                    Xoffset = (self.waves[self.currentWave*self.w*self.h +x-1 +     y*self.w] - self.waves[self.currentWave*self.w*self.h + x+1 +     y*self.w]) / 32
+                    Yoffset = (self.waves[self.currentWave*self.w*self.h +x   + (y-1)*self.w] - self.waves[self.currentWave*self.w*self.h + x   + (y+1)*self.w]) / 32
                     
                     xnew = x + Xoffset
                     ynew = y + Yoffset
                     
-                    xnew = constrain(xnew,0,self.w-1)
-                    ynew = constrain(ynew,0,self.h-1)
+                    xnew = constrain(xnew, 0, self.w-1)
+                    ynew = constrain(ynew, 0, self.h-1)
                     
                     shading = (Xoffset - Yoffset) / 2
                     
@@ -150,9 +146,9 @@ class VizScenarioWater(MTWidget):
                     g = constrain(g, 0, 255)
                     b = constrain(b, 0, 255)
                     
-                    self.render[(x+y*self.w)*3] = r
-                    self.render[(x+y*self.w)*3+1] = g
-                    self.render[(x+y*self.w)*3+2] = b
+                    self.render[(x + y*self.w)*3    ] = r
+                    self.render[(x + y*self.w)*3 + 1] = g
+                    self.render[(x + y*self.w)*3 + 2] = b
 
 
         self.texture.blit_buffer(self.render.tostring())
