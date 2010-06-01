@@ -18,12 +18,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 '''
 
 from __future__ import with_statement
-from math import cos, sin, pi, sqrt, floor
+from math import cos, sin, pi, sqrt, floor, radians
 from random import random
 from array import array
 from pymt import *
 from OpenGL.GL import *
 from OpenGL.arrays import vbo
+import os
 
 # use cython extension if available
 try:
@@ -36,6 +37,134 @@ except ImportError:
 # some facilities
 ww, wh = ws = getWindow().size
 w2, h2 = ww / 2., wh / 2.
+
+
+def constrain(val,min,max):
+    if val < min:
+        return min
+    if val > max:
+        return max
+    return val
+
+class VizScenarioWater(MTWidget):
+    title = 'Water'
+    author = 'Remi'
+    
+    
+    def __init__(self, **kwargs):
+        super(VizScenarioWater, self).__init__(**kwargs)
+        
+        self.damping = 0.95 # attenuation
+        self.radius = 10     # radius of the splash
+        self.previousWave = 0
+        self.currentWave = 1
+        self.w = 300 # dimensions of the texture
+        self.h = 194
+
+        
+        self.waves = [0,1]
+        self.waves[0] = [[ 0 for x in range(self.h)] for y in range(self.w)]
+        self.waves[1] = [[ 0 for x in range(self.h)] for y in range(self.w)]
+        
+        self.render = array('B', '\x00' * self.w * self.h * 3)
+        self.texture = Texture.create(self.w, self.h, format=GL_RGB)
+        self.bpp=4
+        self.bg = Image.load(os.path.join(os.path.dirname(__file__), 'ressource/pymt-logo.png'), keep_data=True)
+        #self.bpp=3
+        #self.bg = Image.load(os.path.join(os.path.dirname(__file__), 'ressource/back.jpg'), keep_data=True)
+        
+        #extract colour component
+        self.r = list('\x00' * self.w * self.h)
+        self.g = list('\x00' * self.w * self.h)
+        self.b = list('\x00' * self.w * self.h)
+        for y in range(0,self.h):
+            for x in range(0,self.w):
+                self.r[x+y*self.w] = ord(self.bg.image._data.data[(x + y*self.w)*self.bpp])
+                self.g[x+y*self.w] = ord(self.bg.image._data.data[(x + y*self.w)*self.bpp+1])
+                self.b[x+y*self.w] = ord(self.bg.image._data.data[(x + y*self.w)*self.bpp+2])
+
+    def on_touch_up(self, touch):
+        x = touch.x - (ww-self.w)/2
+        y = touch.y - (wh-self.h)/2
+        if x >= 0 and x <= self.w and y >= 0 and y <= self.h:
+            self.drop(x, y)
+    
+    def on_touch_move(self, touch):
+        x = touch.x - (ww-self.w)/2
+        y = touch.y - (wh-self.h)/2
+        if x >= 0 and x <= self.w and y >= 0 and y <= self.h:
+            self.drop(x, y)
+
+    def on_update(self):
+        pass
+    
+    def drop(self,X,Y):
+        X = int(X)
+        Y = int(Y)
+        for y in range(Y - self.radius, Y + self.radius):
+            for x in range(X - self.radius, X + self.radius):
+                dist = sqrt( (X - x)*(X - x) + (Y - y)*(Y - y))
+                if dist < self.radius:
+                    if x > 0 and x < self.w -1 and y > 0 and y < self.h -1:
+                        self.waves[self.currentWave][x][y] = int ((255 - (512 * (1 - dist) / self.radius))/2);
+
+    def draw(self):
+
+        if vizfast:
+            vizfast.waterWave(self.w, self.h, self.waves, self.currentWave,
+                              self.previousWave, self.damping)
+        else:
+            #update the waves
+            for y in range(1,self.h -1):
+                for x in range(1,self.w -1):
+                    self.waves[self.currentWave][x][y] = int((( 
+                        self.waves[self.previousWave][x-1][y] + 
+                        self.waves[self.previousWave][x+1][y] +
+                        self.waves[self.previousWave][x][y-1] +
+                        self.waves[self.previousWave][x][y+1] ) / 2 -
+                        self.waves[self.currentWave][x][y])*self.damping)
+        
+        #draw the image
+        if vizfast:
+            vizfast.waterDraw(self.w, self.h, self.waves, self.currentWave,
+                          self.r, self.g, self.b, self.render)
+        else:
+            for y in range(1,self.h -1):
+                for x in range(1,self.w -1):
+                    
+                    Xoffset = (self.waves[self.currentWave][x-1][y] - self.waves[self.currentWave][x+1][y])/40
+                    Yoffset = (self.waves[self.currentWave][x][y-1] - self.waves[self.currentWave][x][y+1])/40
+                    
+                    xnew = x + Xoffset
+                    ynew = y + Yoffset
+                    
+                    xnew = constrain(xnew,0,self.w-1)
+                    ynew = constrain(ynew,0,self.h-1)
+                    
+                    shading = (Xoffset - Yoffset) / 2
+                    
+                    r = self.r[xnew + ynew*self.w] + shading
+                    g = self.g[xnew + ynew*self.w] + shading
+                    b = self.b[xnew + ynew*self.w] + shading
+                    r = constrain(r, 0, 255)
+                    g = constrain(g, 0, 255)
+                    b = constrain(b, 0, 255)
+                    
+                    self.render[(x+y*self.w)*3] = r
+                    self.render[(x+y*self.w)*3+1] = g
+                    self.render[(x+y*self.w)*3+2] = b
+
+
+        self.texture.blit_buffer(self.render.tostring())
+        set_color(1)
+        #zoomed
+        #drawTexturedRectangle(texture=self.texture, size=(ww/2,wh/2), pos=( (ww-ww/2)/2,(wh-wh/2)/2))
+        drawTexturedRectangle(texture=self.texture, size=(self.w,self.h), pos=( (ww-self.w)/2,(wh-self.h)/2))
+                
+        #swap the two waves
+        self.previousWave = 1 - self.previousWave
+        self.currentWave  = 1 - self.currentWave
+
 
 #
 # Inspiration from Jonathan Chemia
@@ -103,6 +232,8 @@ class VizScenarioBlob(MTWidget):
             if x2:
                 drawLine([x.x, x.y, x2.x, x2.y])
             x2 = x
+
+
 
 
 #
@@ -629,6 +760,7 @@ class VizPlay(MTWidget):
 
 if __name__ == '__main__':
     viz = VizPlay()
+    viz.add_scenario(VizScenarioWater())
     viz.add_scenario(VizScenarioBlob())
     viz.add_scenario(VizScenarioTree())
     viz.add_scenario(VizScenarioEmpathy())

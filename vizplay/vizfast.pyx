@@ -7,6 +7,14 @@ cdef extern from "math.h":
 cdef extern from "stdlib.h":
     int rand()
 
+cdef int boundary(int v, int min, int max):
+    if v < min:
+        return min
+    if v > max:
+        return max
+    return v
+    
+
 # VizScenarioTree
 def drawTree(lines, double x, double y, double l, double d,
              double a, double z, double depth):
@@ -173,3 +181,49 @@ def smokeUpdate(int w, p, double z, double z2, double wf, double t):
         p[x*3] = cl
         p[x*3+1] = cl
         p[x*3+2] = min(255, cl * 2)
+
+
+def waterWave(int w, int h, list waves, int currentWave, int previousWave,
+              double damping):
+    cdef int x, y
+    for y in xrange(1, h-1):
+        for x in xrange(1, w-1):
+            waves[currentWave][x][y] = <int>((( 
+                waves[previousWave][x-1][y] + 
+                waves[previousWave][x+1][y] +
+                waves[previousWave][x][y-1] +
+                waves[previousWave][x][y+1] ) / 2 -
+                    waves[currentWave][x][y]) * damping)
+
+
+def waterDraw(int w, int h, list waves, int currentWave,
+              list r, list g, list b, render):
+    cdef int x, y, Xoffset, Yoffset, xnew, ynew, shading, idx
+    cdef int pr, pg, pb
+    for y in xrange(1,h -1):
+        for x in xrange(1,w -1):
+            
+            Xoffset = <int>(waves[currentWave][x-1][y] - waves[currentWave][x+1][y])/40
+            Yoffset = <int>(waves[currentWave][x][y-1] - waves[currentWave][x][y+1])/40
+            
+            xnew = x + Xoffset
+            ynew = y + Yoffset
+            
+            xnew = boundary(xnew, 0, w-1)
+            ynew = boundary(ynew, 0, h-1)
+            
+            shading = (Xoffset - Yoffset) / 2
+            
+            idx = xnew + ynew*w
+            pr = <int>(r[idx] + shading)
+            pg = <int>(g[idx] + shading)
+            pb = <int>(b[idx] + shading)
+            pr = boundary(pr, 0, 255)
+            pg = boundary(pg, 0, 255)
+            pb = boundary(pb, 0, 255)
+            
+            idx = (x + y * w) * 3
+            render[idx] = pr
+            render[idx+1] = pg
+            render[idx+2] = pb
+
