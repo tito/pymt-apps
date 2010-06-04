@@ -188,12 +188,12 @@ def waterWave(int w, int h, list waves, int currentWave, int previousWave,
     cdef int x, y
     for y in xrange(1, h-1):
         for x in xrange(1, w-1):
-            waves[currentWave][x][y] = <int>((( 
-                waves[previousWave][x-1][y] + 
-                waves[previousWave][x+1][y] +
-                waves[previousWave][x][y-1] +
-                waves[previousWave][x][y+1] ) / 2 -
-                    waves[currentWave][x][y]) * damping)
+            waves[currentWave*w*h+x+y*w] = <int>((( 
+                <int>waves[previousWave*w*h + x-1 +     y*w] + 
+                <int>waves[previousWave*w*h + x+1 +     y*w] +
+                <int>waves[previousWave*w*h + x   + (y-1)*w] +
+                <int>waves[previousWave*w*h + x   + (y+1)*w] ) / 2 -
+                <int>waves[currentWave*w*h  + x   +     y*w]) * damping)
 
 
 def waterDraw(int w, int h, list waves, int currentWave,
@@ -203,8 +203,8 @@ def waterDraw(int w, int h, list waves, int currentWave,
     for y in xrange(1,h -1):
         for x in xrange(1,w -1):
             
-            Xoffset = <int>(waves[currentWave][x-1][y] - waves[currentWave][x+1][y])/40
-            Yoffset = <int>(waves[currentWave][x][y-1] - waves[currentWave][x][y+1])/40
+            Xoffset = (<int>waves[currentWave*w*h + x-1 +     y*w] - <int>waves[currentWave*w*h + x+1 +     y*w]) / 32
+            Yoffset = (<int>waves[currentWave*w*h + x   + (y-1)*w] - <int>waves[currentWave*w*h + x   + (y+1)*w]) / 32
             
             xnew = x + Xoffset
             ynew = y + Yoffset
@@ -215,9 +215,9 @@ def waterDraw(int w, int h, list waves, int currentWave,
             shading = (Xoffset - Yoffset) / 2
             
             idx = xnew + ynew*w
-            pr = <int>(r[idx] + shading)
-            pg = <int>(g[idx] + shading)
-            pb = <int>(b[idx] + shading)
+            pr = <int>r[idx] + shading
+            pg = <int>g[idx] + shading
+            pb = <int>b[idx] + shading
             pr = boundary(pr, 0, 255)
             pg = boundary(pg, 0, 255)
             pb = boundary(pb, 0, 255)
