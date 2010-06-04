@@ -57,7 +57,7 @@ class SlideContainer(MTScatterPlane):
             for child in [x for x in self.children if x.do_draw]:
                 child.dispatch_event('on_draw')
             glLineWidth(3)
-            set_color(0, 0, 0, .8)
+            set_color(.8, .8, .8, .8)
             for x in self.linepen:
                 drawLine(x)
 

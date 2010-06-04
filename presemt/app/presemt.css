@@ -1,9 +1,9 @@
 presemt {
-	bg-color: rgb(240, 240, 240);
+	bg-color: rgb(20, 20, 20);
 }
 
 slidecontainer {
-	grid-color: rgb(210, 210, 210);
+	grid-color: rgb(50, 50, 50);
 }
 
 filebrowserview,
@@ -16,6 +16,7 @@ bookmarkbar {
 
 .slide-textinput,
 presemtbutton {
+	color: rgb(240, 240, 240);
 	draw-background: 0;
 	draw-alpha-background: 0;
 	draw-border: 0;

@@ -1,0 +1,38 @@
+Tonepads - 1.0
+==============
+
+Author
+------
+
+Mathieu Virbel <tito@bankiz.org>
+
+
+Dependices
+----------
+
+PyMT 0.5 (or current master)
+pymunk (easy_install pymunk)
+
+
+Launch
+------
+
+python tonepads.py
+
+
+Usage
+-----
+
+Windows: you can use internal midi controler of Windows
+Other: launch a midi application (zynaddsubfx for eg)
+
+- Click on MIDI and select your midi controller
+- 2 touchs at the same time to create a Pads
+- If you reduce the size of the pads, it will be destroyed
+- Double tap & hold on a generator, and move your finger far or closer to the generator. The number is the midi channel
+
+Bugs
+----
+
+Currently, on windows, you're not able to select the sound.
+The first created device have the sound 82, and the other is default.

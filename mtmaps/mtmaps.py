@@ -285,8 +285,8 @@ class InteractiveMap(ScatterMap):
         self.provider = ModestMaps.builtinProviders[self.provider_id]()
         self.texsize = (self.provider.tileWidth(), self.provider.tileHeight())
         for p in self.provider_ids_btns:
-            self.provider_ids_btns[p].set_state('normal')
-        self.provider_ids_btns[provider].set_state('down')
+            self.provider_ids_btns[p].state = 'normal'
+        self.provider_ids_btns[provider].state = 'down'
 
     def position_to_location(self, x, y):
         pzoom = math.pow(2, self.zoom - 1)
