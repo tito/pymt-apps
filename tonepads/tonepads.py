@@ -170,7 +170,7 @@ class RtMidiClock(MidiClock):
             self.dev.close()
         self.dev = midi.Output(i)
         # TODO make it customizable
-        if os.platform == 'win32':
+        if sys.platform == 'win32':
             self.dev.set_instrument(82)
         self.lock.release()
 
