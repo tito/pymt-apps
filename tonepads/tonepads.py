@@ -315,7 +315,7 @@ class MusicPad(MTWidget):
         self.pos = (self.v1 + self.v2) / 2.
         self.body.position = self.pos
         self.line = pymunk.Segment(self.body, self.v1 - self.pos, self.v2 - self.pos, 5.0)
-        self.line.elasticity = 0.95
+        self.line.elasticity = 1
         self.space.add(self.line)
 
     def draw(self):
@@ -461,11 +461,13 @@ class MusicGenerator(MTDragable):
         inertia = pymunk.moment_for_circle(mass, 0, self.radius, (0,0))
         body = pymunk.Body(mass, inertia)
         body.position = self.x, self.y
+        #body.apply_impulse(1)
         shape = pymunk.Circle(body, self.radius, (0,0))
         shape.elasticity = 0.95
         self.space.add(body, shape)
         self.balls.append(shape)
         ball_registry[shape] = self
+        body.apply_impulse((0, -500))
 
     def collide_point(self, x, y):
         d = Vector(x, y).distance(Vector(self.pos))
@@ -557,8 +559,9 @@ class MusicPlane(MTScatterPlane):
         # initialize physics
         pymunk.init_pymunk()
         space = pymunk.Space()
-        space.gravity = (0.0, -900.0)
-        space.set_default_collision_handler(None, None, self.collide_found, None)
+        #space.gravity = (0.0, -900.0)
+        space.gravity = (0.0, 0.0)
+        space.set_default_collision_handler(self.collide_found, None, None, None)
         self.space = space
 
     def collide_found(self, space, arbitrer, *largs):
@@ -666,7 +669,7 @@ class ConfigMidi(MTBoxLayout):
             info = midi.get_device_info(index)
             interf, name, input, output, opened = info
             if output <= 0:
-                return
+                continue
             btn = MTToggleButton(label=name, size=(200, 30))
             btn.size = btn.label_obj.content_width + 20, 30
             btn.push_handlers(on_press=curry(self.select, index))
