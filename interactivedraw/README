@@ -1,0 +1,26 @@
+Interactive Draw - 0.1
+======================
+
+Author
+------
+
+Mathieu Virbel <tito@bankiz.org>
+
+
+Dependices
+----------
+
+PyMT 0.5 (or current master)
+
+
+Launch
+------
+
+python interactivedraw.py
+
+
+Usage
+-----
+
+Draw on the screen, wait 2s, and replay start.
+To restart a new draw, double tap & draw.
