@@ -16,14 +16,14 @@ cdef int boundary(int v, int min, int max):
     
 
 # VizScenarioTree
-def drawTree(lines, double x, double y, double l, double d,
+cpdef drawTree(lines, double x, double y, double l, double d,
              double a, double z, double depth):
-        cdef double f
+        cdef double f, dx, dy
 
         if depth >= 12:
             return
 
-        f = 1 / (1 + float(depth) / 2.)
+        f = 1 / (1 + <float>(depth) / 2.)
         dx = x + l * cos(d)
         dy = y + l * sin(d)
         lines.extend((x, y, dx, dy))

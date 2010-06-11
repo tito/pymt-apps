@@ -756,9 +756,9 @@ class VizPlay(MTWidget):
 
 if __name__ == '__main__':
     viz = VizPlay()
+    viz.add_scenario(VizScenarioTree())
     viz.add_scenario(VizScenarioWater())
     viz.add_scenario(VizScenarioBlob())
-    viz.add_scenario(VizScenarioTree())
     viz.add_scenario(VizScenarioEmpathy())
     viz.add_scenario(VizScenarioSmoke())
     viz.add_scenario(VizScenarioEmotive())
