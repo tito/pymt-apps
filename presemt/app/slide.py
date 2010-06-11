@@ -1,7 +1,8 @@
 __all__ = ('Slide', )
 
 import os
-from pymt import MTWidget, MTScatterWidget, set_color, drawRectangle
+from pymt import MTWidget, MTScatterWidget, set_color, drawRectangle, \
+        drawLabel, getLastLabel
 
 class EditProxy(MTWidget):
     def __init__(self, ctx, **kwargs):
@@ -61,6 +62,8 @@ class SlideItem(MTScatterWidget):
         if self.ctx.mode == 'layout':
             set_color(0,1,0)
             drawRectangle(pos=(-10,-10),size=(self.width+20,self.height+20))
+            drawLabel(label=str(self.parent.groupid), pos=(-12, -10),
+                      color=(1, 1, 1), center=False)
         elif self.ctx.mode == 'edit':
             set_color(1,1,0)
             drawRectangle(pos=(-10,-10),size=(self.width+20,self.height+20))
