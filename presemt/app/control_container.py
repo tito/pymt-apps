@@ -4,7 +4,6 @@ from os import path
 from pymt import MTScatterPlane, set_color, drawLine, set_brush, gx_matrix, \
                 getWindow, drawPolygon, MTWidget
 from array import array
-from tesselator import Tesselator
 from OpenGL.GL import *
 from OpenGL.arrays import vbo
 
