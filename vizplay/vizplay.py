@@ -161,6 +161,90 @@ class VizScenarioWater(MTWidget):
         self.previousWave = 1 - self.previousWave
         self.currentWave  = 1 - self.currentWave
 
+# http://www.chiptune.com/starfield/starfield.html
+# javascript, not processing this time!
+class VizScenarioStar(MTWidget):
+    title = 'Star Field'
+    author = 'Christophe Resigne'
+    flag = True
+    test = True
+    n = 512
+    w = ww
+    h = wh
+    x = int(w/2)
+    y = int(h/2)
+    z = (w+h)/2
+    star_color_ratio = 1/z
+    star_x_save = 0
+    star_y_save = 0
+    star_ratio = 256
+    star_speed = 4
+    star_speed_save = 0
+   
+    color = 1
+    opacity = 0.1
+    
+    cursor_x = x
+    cursor_y = y
+    mouse_x = 0
+    mouse_y = 0
+
+    def __init__(self, **kwargs):
+        super(VizScenarioStar, self).__init__()
+        a = 0
+        self.star = [0 for x in range(self.n)]
+        for i in range(self.n):
+            self.star[i] = [0 for x in range(5)]
+            self.star[i][0] = random()*self.w*2-self.x*2
+            self.star[i][1] = random()*self.h*2-self.y*2
+            self.star[i][2] = round(random()*self.z)
+            self.star[i][3] = 0
+            self.star[i][4] = 0
+
+    def on_touch_down(self,touch):
+        self.cursor_x = int(touch.x)
+        self.cursor_y = int(touch.y)
+    
+    def on_touch_move(self,touch):
+        self.cursor_x = int(touch.x)
+        self.cursor_y = int(touch.y)
+    
+    def draw(self):
+        self.mouse_x = self.cursor_x-self.x;
+        self.mouse_y = self.cursor_y-self.y;
+        for i in range (self.n):
+            self.test = True
+            self.star_x_save = self.star[i][3]
+            self.star_y_save = self.star[i][4]
+            self.star[i][0] += self.mouse_x >> 4 
+            if self.star[i][0] > (self.x << 1):
+                self.star[i][0] -= self.w << 1 
+                self.test = False
+            if self.star[i][0] < (-self.x << 1):
+                self.star[i][0] += self.w << 1
+                self.test = False
+            self.star[i][1] += self.mouse_y >> 4
+            if self.star[i][1]>self.y<<1:
+                self.star[i][1] -= self.h<<1
+                self.test = False
+            if self.star[i][1] < (-self.y << 1):
+                self.star[i][1] += self.h << 1
+                self.test = False
+            self.star[i][2] -= self.star_speed
+            if self.star[i][2] > self.z:
+                self.star[i][2] -= self.z
+                self.test = False
+            if self.star[i][2] < 0:
+                self.star[i][2] += self.z
+                self.test = False
+            if self.star[i][2] == 0:
+                self.star[i][2] = 0.1
+            self.star[i][3] = self.x + (self.star[i][0] / self.star[i][2])*self.star_ratio
+            self.star[i][4] = self.y + (self.star[i][1] / self.star[i][2])*self.star_ratio
+            if self.star_x_save>0 and self.star_x_save<self.w and self.star_y_save>0 and self.star_y_save<self.h and self.test:
+			    set_color(1)
+			    drawLine([self.star_x_save,self.star_y_save, self.star[i][3],self.star[i][4]], width=1)
+
 
 #
 # Inspiration from Jonathan Chemia
@@ -756,8 +840,9 @@ class VizPlay(MTWidget):
 
 if __name__ == '__main__':
     viz = VizPlay()
-    viz.add_scenario(VizScenarioTree())
     viz.add_scenario(VizScenarioWater())
+    viz.add_scenario(VizScenarioStar())
+    viz.add_scenario(VizScenarioTree())
     viz.add_scenario(VizScenarioBlob())
     viz.add_scenario(VizScenarioEmpathy())
     viz.add_scenario(VizScenarioSmoke())
