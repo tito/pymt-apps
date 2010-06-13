@@ -78,9 +78,10 @@ class SlideContainer(MTScatterPlane):
         set_color(*self.style.get('grid-color'))
         glLineWidth(1)
         glEnableClientState(GL_VERTEX_ARRAY)
-        with self.vbo:
-            glVertexPointer(2, GL_FLOAT, 0, None)
-            glDrawArrays(GL_LINES, 0, self.lcount)
+        self.vbo.bind()
+        glVertexPointer(2, GL_FLOAT, 0, None)
+        glDrawArrays(GL_LINES, 0, self.lcount)
+        self.vbo.unbind()
         glDisableClientState(GL_VERTEX_ARRAY)
 
     def on_update(self):
