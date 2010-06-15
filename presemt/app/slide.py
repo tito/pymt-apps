@@ -27,6 +27,7 @@ class SlideItem(MTScatterWidget):
     def __init__(self, ctx, **kwargs):
         kwargs.setdefault('restoremode', False)
         self.do_draw = False
+        self.is_loaded = True
         self.ctx = ctx
         self.locked = True
         self.proxy = EditProxy(self.ctx)

@@ -8,8 +8,8 @@ class SlideImage(SlideItem):
     def __init__(self, *largs, **kwargs):
         super(SlideImage, self).__init__(*largs, **kwargs)
         self._filename = ''
+        self.is_loaded = False
         self.image = None
-        self.image_loaded = False
         if self.restoremode is False:
             self.filename = 'content/1.png'
         self.fb = None
@@ -19,7 +19,7 @@ class SlideImage(SlideItem):
     def _set_filename(self, filename):
         self._filename = self.clean_filename(filename)
         try:
-            self.image_loaded = False
+            self.is_loaded = False
             self.image = Loader.image(self._filename)
             if self.image.loaded is False:
                 self.image.connect('on_load', self._image_on_load)
@@ -31,7 +31,7 @@ class SlideImage(SlideItem):
     filename = property(_get_filename, _set_filename)
 
     def _image_on_load(self, *largs):
-        self.image_loaded = True
+        self.is_loaded = True
         self.width = (self.image.width / float(self.image.height)) * self.height
 
     def draw(self):

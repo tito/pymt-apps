@@ -1,11 +1,12 @@
 import os
+import time
 import json
 from pymt import *
 from pymt.parser import parse_color
 
 import euclid
 from control_container import SlideContainer
-from control_bookmark import BookmarkBar
+from control_bookmark import BookmarkBar, get_screen_texture
 from control_workmode import WorkModeControler
 from control_live import LiveControler
 from control_additem import AddItemMenu
@@ -196,6 +197,69 @@ class Presemt(MTWidget):
         if self.interpolation == 0 and self.current_bookmark:
             self.ui_bookmark.update_screenshot(self.current_bookmark)
             self.current_bookmark = None
+
+    def export_to_pdf(self):
+        def _screenshot():
+            # method imported from keybinding screenshot
+            import pygame
+            from OpenGL.GL import glReadBuffer, glReadPixels, GL_RGB, \
+                GL_UNSIGNED_BYTE, GL_BACK, GL_FRONT
+            win = getWindow()
+            glReadBuffer(GL_FRONT)
+            data = glReadPixels(0, 0, win.width, win.height, GL_RGB, GL_UNSIGNED_BYTE)
+            surface = pygame.image.fromstring(str(buffer(data)), win.size, 'RGB', True)
+            filename = 'presemt.screenshot.tmp.jpg'
+            pygame.image.save(surface, filename)
+            return filename
+
+        # create PDF !
+        from reportlab.pdfgen import canvas
+
+        # do capture in live mode
+        self.mode = 'live'
+        self.remove_widget(self.ui_live)
+
+        # create a pdf with the same name as our filename
+        filename = '%s.pdf' % ('.'.join(self.filename.split('.')[:-1]))
+        pdf = canvas.Canvas(filename, pagesize=getWindow().size)
+
+        # prepare pymt to run in slave mode
+        runTouchApp(self, slave=True)
+        evloop = getEventLoop()
+
+        # ensure the window have the good size
+        getWindow().dispatch_event('on_resize', *getWindow().size)
+
+        # wait loader to finished
+        print 'Wait loader to finish to load all childrens'
+        for x in self.ui_canvas.children:
+            if not x.is_loaded:
+                time.sleep(.1)
+                evloop.idle()
+
+        # capture all bookmark
+        last_screenshot = None
+        for bookmark in self.ui_bookmark.bookmarks_keys:
+            # XXX called 2 times to be sure that translation is done
+            self.goto_view(bookmark)
+            self.interpolation = 0.0000001
+
+            # call idle twice
+            evloop.idle()
+            evloop.idle()
+
+            # put image on pdf
+            last_screenshot = _screenshot()
+            pdf.drawInlineImage(last_screenshot, 0, 0)
+            pdf.showPage()
+            os.unlink(last_screenshot)
+
+        # save pdf
+        pdf.save()
+        print
+        print 'PDF saved to', filename
+        print
+
 
     def save(self, *largs):
         data = {}

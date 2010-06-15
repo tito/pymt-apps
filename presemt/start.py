@@ -24,7 +24,7 @@ if __name__ == '__main__':
     import sys
     from pymt import runTouchApp, getWindow
 
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print
         print 'Usage: python start.py <filename_of_presentation.m>'
         print
@@ -36,8 +36,13 @@ if __name__ == '__main__':
 
     from app import Presemt
 
+    dontrun = False
     m = Presemt(size=getWindow().size)
     m.load(sys.argv[1])
-
-    runTouchApp(m)
+    if len(sys.argv) >= 3:
+        if sys.argv[2] == '--pdf':
+            m.export_to_pdf()
+            dontrun = True
+    if not dontrun:
+        runTouchApp(m)
 
