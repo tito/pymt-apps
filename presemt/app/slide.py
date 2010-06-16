@@ -61,12 +61,12 @@ class SlideItem(MTScatterWidget):
 
     def draw(self):
         if self.ctx.mode == 'layout':
-            set_color(0,1,0)
+            set_color(0, 0.7, 0)
             drawRectangle(pos=(-10,-10),size=(self.width+20,self.height+20))
             drawLabel(label=str(self.parent.groupid), pos=(-12, -10),
                       color=(1, 1, 1), center=False)
         elif self.ctx.mode == 'edit':
-            set_color(1,1,0)
+            set_color(0.7, 0.7, 0)
             drawRectangle(pos=(-10,-10),size=(self.width+20,self.height+20))
 
     @staticmethod
