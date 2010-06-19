@@ -1,11 +1,12 @@
 __all__ = ('ViewBookMark', 'BookmarkBar')
 
 import pygame
-from pymt import MTBoxLayout, MTImageButton, Image, getWindow, Texture, \
-        serialize_numpy, deserialize_numpy
+from pymt import MTImageButton, Image, getWindow, Texture, \
+        serialize_numpy, deserialize_numpy, MTKineticList, MTKineticItem
 from OpenGL.GL import glReadBuffer, glReadPixels, GL_RGB, \
         GL_UNSIGNED_BYTE, GL_FRONT, GL_BACK
 from base64 import b64encode, b64decode
+
 
 def get_screen_texture(mode='back'):
     win = getWindow()
@@ -26,7 +27,7 @@ def get_screen_texture(mode='back'):
     return tex, [size[0], size[1], data]
 
 
-class ViewBookMark:
+class ViewBookMark(MTImageButton, MTKineticItem):
     def __init__(self, transform, **kwargs):
         kwargs.setdefault('info', None)
         self.view_transform = transform
@@ -40,23 +41,41 @@ class ViewBookMark:
             data = b64decode(data)
             tex = Texture.create(w, h, GL_RGB, GL_UNSIGNED_BYTE)
             tex.blit_buffer(data)
-            self.screenshot = Image(tex)
+            self.image = Image(tex)
+        kwargs['image'] = self.image
         self.updated = False
+        super(ViewBookMark, self).__init__(**kwargs)
+
+    def on_press(self, touch):
+        p = self.parent
+        if p.ctx.mode in ('layout', 'edit') and touch.is_double_tap:
+            p.remove_bookmark(self)
+        else:
+            p.goto(p.bookmarks.index(self))
+        return True
 
     def update_screenshot(self):
         tex, info = get_screen_texture()
         self.info = info
         self.info[-1] = b64encode(self.info[-1])
-        self.screenshot = Image(tex)
+        self.image = Image(tex)
 
-class BookmarkBar(MTBoxLayout):
+
+class BookmarkBar(MTKineticList):
     def __init__(self, ctx, **kwargs):
-        kwargs.setdefault('spacing',2)
-        kwargs.setdefault('padding',4)
+        kwargs.setdefault('spacing', 2)
+        kwargs.setdefault('padding', 4)
+        kwargs.setdefault('h_limit', 1)
+        kwargs.setdefault('do_y', False)
+        kwargs.setdefault('title', None)
+        kwargs.setdefault('deletable', False)
+        kwargs.setdefault('searchable', False)
+        kwargs.setdefault('w_limit', 0)
+        kwargs.setdefault('do_x', True)
+        kwargs.setdefault('do_y', False)
         super(BookmarkBar, self).__init__(**kwargs)
         self.ctx = ctx
-        self.bookmarks_buttons = {}
-        self.bookmarks_keys = []
+        self.bookmarks = []
         self._current = None
 
     def create_bookmark(self):
@@ -81,35 +100,26 @@ class BookmarkBar(MTBoxLayout):
         return ret
 
     def add_bookmark(self, bookmark):
-        bookmark_btn = MTImageButton(image=bookmark.screenshot)
-        @bookmark_btn.event
-        def on_press(touch):
-            if self.ctx.mode in ('layout', 'edit') and touch.is_double_tap:
-                self.remove_widget(bookmark_btn)
-                # remove current, set to next
-                if self._current == bookmark:
-                    self.next()
-                del self.bookmarks_buttons[bookmark]
-                self.bookmarks_keys.remove(bookmark)
-            else:
-                self.goto(self.bookmarks_keys.index(bookmark))
-            return True
-
-        self.bookmarks_buttons[bookmark] = bookmark_btn
-        self.bookmarks_keys.append(bookmark)
-        self.add_widget(bookmark_btn)
+        self.bookmarks.append(bookmark)
+        self.add_widget(bookmark)
         self.do_layout()
         self._current = bookmark
 
+    def remove_bookmark(self, bookmark):
+        self.remove_widget(bookmark)
+        # remove current, set to next
+        if self._current == bookmark:
+            self.next()
+        self.bookmarks.remove(bookmark)
+
     def update_screenshot(self, bookmark):
-        if not bookmark in self.bookmarks_buttons:
+        if not bookmark in self.bookmarks:
             return
         bookmark.update_screenshot()
-        self.bookmarks_buttons[bookmark].image = bookmark.screenshot
 
     def goto(self, idx):
         try:
-            self._current = self.bookmarks_keys[idx % len(self.bookmarks_keys)]
+            self._current = self.bookmarks[idx % len(self.bookmarks)]
             self.parent.goto_view(self._current)
         except:
             pass
@@ -117,16 +127,16 @@ class BookmarkBar(MTBoxLayout):
     def previous(self):
         if self._current is None:
             return
-        self.goto(self.bookmarks_keys.index(self._current) - 1)
+        self.goto(self.bookmarks.index(self._current) - 1)
 
     def next(self):
         if self._current is None:
             return
-        self.goto(self.bookmarks_keys.index(self._current) + 1)
+        self.goto(self.bookmarks.index(self._current) + 1)
 
     def _get_state(self):
         data = []
-        for x in self.bookmarks_keys:
+        for x in self.bookmarks:
             data.append({
                 'matrix': serialize_numpy(x.view_transform),
                 'info': x.info
