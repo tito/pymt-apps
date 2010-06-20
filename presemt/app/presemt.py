@@ -29,6 +29,7 @@ class Presemt(MTWidget):
         self.current_bookmark = None
         self.interpolation = 0.0
         self.create_ui()
+        getWindow().push_handlers(on_key_up=self._window_on_key_up)
 
     @staticmethod
     def register_slide_class(type_factory):
@@ -158,6 +159,16 @@ class Presemt(MTWidget):
         self.destination_view = self.capture_current_view()
         self.current_bookmark = bookmark
         self.interpolation = 1.0
+
+    def _window_on_key_up(self, key, scancode=None, unicode=None):
+        if self.mode != 'live':
+            return
+        if key == 275:
+            # Cursor right
+            self.goto_next()
+        elif key == 276:
+            # Cursor left
+            self.goto_previous()
 
     def on_update(self):
         super(Presemt, self).on_update()
