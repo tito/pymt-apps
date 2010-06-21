@@ -105,6 +105,7 @@ class BookmarkBar(MTKineticList):
         self.add_widget(bookmark)
         self.do_layout()
         self._current = bookmark
+        self.ctx.set_dirty()
 
     def remove_bookmark(self, bookmark):
         self.remove_widget(bookmark)
@@ -112,6 +113,7 @@ class BookmarkBar(MTKineticList):
         if self._current == bookmark:
             self.next()
         self.bookmarks.remove(bookmark)
+        self.ctx.set_dirty()
 
     def update_screenshot(self, bookmark):
         if not bookmark in self.bookmarks:
