@@ -73,6 +73,7 @@ class BookmarkBar(MTKineticList):
         kwargs.setdefault('w_limit', 0)
         kwargs.setdefault('do_x', True)
         kwargs.setdefault('do_y', False)
+        kwargs.setdefault('style', {'scrollbar-size': 0})
         super(BookmarkBar, self).__init__(**kwargs)
         self.ctx = ctx
         self.bookmarks = []
