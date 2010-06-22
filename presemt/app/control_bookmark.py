@@ -1,8 +1,8 @@
 __all__ = ('ViewBookMark', 'BookmarkBar')
 
 import pygame
-from pymt import MTImageButton, Image, getWindow, Texture, \
-        serialize_numpy, deserialize_numpy, MTKineticList, MTKineticItem
+from pymt import MTBoxLayout, MTImageButton, Image, getWindow, Texture, \
+        serialize_numpy, deserialize_numpy, MTList
 from OpenGL.GL import glReadBuffer, glReadPixels, GL_RGB, \
         GL_UNSIGNED_BYTE, GL_FRONT, GL_BACK
 from base64 import b64encode, b64decode
@@ -61,22 +61,15 @@ class ViewBookMark(MTImageButton, MTKineticItem):
         self.image = Image(tex)
 
 
-class BookmarkBar(MTKineticList):
+class BookmarkBar(MTList):
     def __init__(self, ctx, **kwargs):
-        kwargs.setdefault('spacing', 2)
-        kwargs.setdefault('padding', 4)
-        kwargs.setdefault('h_limit', 1)
         kwargs.setdefault('do_y', False)
-        kwargs.setdefault('title', None)
-        kwargs.setdefault('deletable', False)
-        kwargs.setdefault('searchable', False)
-        kwargs.setdefault('w_limit', 0)
-        kwargs.setdefault('do_x', True)
-        kwargs.setdefault('do_y', False)
-        kwargs.setdefault('style', {'scrollbar-size': 0})
         super(BookmarkBar, self).__init__(**kwargs)
         self.ctx = ctx
-        self.bookmarks = []
+        self.layout = MTBoxLayout(spacing=2, padding=4)
+        self.add_widget(self.layout)
+        self.bookmarks_buttons = {}
+        self.bookmarks_keys = []
         self._current = None
 
     def create_bookmark(self):
@@ -101,9 +94,24 @@ class BookmarkBar(MTKineticList):
         return ret
 
     def add_bookmark(self, bookmark):
-        self.bookmarks.append(bookmark)
-        self.add_widget(bookmark)
-        self.do_layout()
+        bookmark_btn = MTImageButton(image=bookmark.screenshot)
+        @bookmark_btn.event
+        def on_press(touch):
+            if self.ctx.mode in ('layout', 'edit') and touch.is_double_tap:
+                self.layout.remove_widget(bookmark_btn)
+                # remove current, set to next
+                if self._current == bookmark:
+                    self.next()
+                del self.bookmarks_buttons[bookmark]
+                self.bookmarks_keys.remove(bookmark)
+            else:
+                self.goto(self.bookmarks_keys.index(bookmark))
+            return True
+
+        self.bookmarks_buttons[bookmark] = bookmark_btn
+        self.bookmarks_keys.append(bookmark)
+        self.layout.add_widget(bookmark_btn)
+        self.layout.do_layout()
         self._current = bookmark
         self.ctx.set_dirty()
 
