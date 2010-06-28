@@ -682,6 +682,7 @@ class ConfigMidi(MTBoxLayout):
         w = self.get_parent_window()
         if w:
             self.center = Vector(w.size) / 2.
+        super(MTBoxLayout, self).on_update()
 
     def draw(self):
         c = self.style.get('bg-color')
@@ -719,6 +720,7 @@ class UISelector(MTBoxLayout):
     def on_update(self):
         w = self.get_parent_window()
         self.center = (w.width / 2., w.height - self.height)
+        super(MTBoxLayout, self).on_update()
 
     def draw(self):
         set_color(COLOR_GENERATOR[0], COLOR_GENERATOR[1], COLOR_GENERATOR[2], .5)
@@ -771,6 +773,7 @@ class UITools(MTBoxLayout):
     def on_update(self):
         w = self.get_parent_window()
         self.center = (w.width / 2., self.height)
+        super(MTBoxLayout, self).on_update()
 
     def draw(self):
         set_color(COLOR_GENERATOR[0], COLOR_GENERATOR[1], COLOR_GENERATOR[2], .5)
