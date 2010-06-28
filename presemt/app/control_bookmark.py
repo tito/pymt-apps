@@ -2,7 +2,7 @@ __all__ = ('ViewBookMark', 'BookmarkBar')
 
 import pygame
 from pymt import MTBoxLayout, MTImageButton, Image, getWindow, Texture, \
-        serialize_numpy, deserialize_numpy
+        serialize_numpy, deserialize_numpy, MTList
 from OpenGL.GL import glReadBuffer, glReadPixels, GL_RGB, \
         GL_UNSIGNED_BYTE, GL_FRONT, GL_BACK
 from base64 import b64encode, b64decode
@@ -49,12 +49,13 @@ class ViewBookMark:
         self.info[-1] = b64encode(self.info[-1])
         self.screenshot = Image(tex)
 
-class BookmarkBar(MTBoxLayout):
+class BookmarkBar(MTList):
     def __init__(self, ctx, **kwargs):
-        kwargs.setdefault('spacing',2)
-        kwargs.setdefault('padding',4)
+        kwargs.setdefault('do_y', False)
         super(BookmarkBar, self).__init__(**kwargs)
         self.ctx = ctx
+        self.layout = MTBoxLayout(spacing=2, padding=4)
+        self.add_widget(self.layout)
         self.bookmarks_buttons = {}
         self.bookmarks_keys = []
         self._current = None
@@ -85,7 +86,7 @@ class BookmarkBar(MTBoxLayout):
         @bookmark_btn.event
         def on_press(touch):
             if self.ctx.mode in ('layout', 'edit') and touch.is_double_tap:
-                self.remove_widget(bookmark_btn)
+                self.layout.remove_widget(bookmark_btn)
                 # remove current, set to next
                 if self._current == bookmark:
                     self.next()
@@ -97,8 +98,8 @@ class BookmarkBar(MTBoxLayout):
 
         self.bookmarks_buttons[bookmark] = bookmark_btn
         self.bookmarks_keys.append(bookmark)
-        self.add_widget(bookmark_btn)
-        self.do_layout()
+        self.layout.add_widget(bookmark_btn)
+        self.layout.do_layout()
         self._current = bookmark
 
     def update_screenshot(self, bookmark):
