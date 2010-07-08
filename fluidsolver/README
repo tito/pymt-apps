@@ -1,0 +1,22 @@
+FluidSolver 0.1 BETA
+====================
+
+This is a fluid solver ported from MSAFluid.
+A big up to http://memo.tv/ !!!!!
+
+Maintainer
+----------
+
+Mathieu Virbel <tito@bankiz.org>
+
+Dependices
+----------
+
+PyMT 0.5 (0.4?)
+
+
+How to run
+----------
+
+python fluidsolver.py
+
