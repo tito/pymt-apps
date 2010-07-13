@@ -147,7 +147,7 @@ class Presemt(MTWidget):
         #current view = translation, scale and rotation around(0,0)
         #we store quaternion, becasue it is much better for interpolating angles (always rotates shortest way)
         scale = self.ui_canvas.scale
-        pos = Vector(*self.ui_canvas.to_parent(0, 0))
+        pos = self.ui_canvas.to_parent(0, 0)
         quat = quaternion_from_matrix(self.ui_canvas.transform)
         return (scale, pos, quat)
 
@@ -173,7 +173,8 @@ class Presemt(MTWidget):
         s = self.source_view[0] + i * (self.destination_view[0] - self.source_view[0])
         scale = scale_matrix(s)
 
-        t = self.source_view[1] + i*(self.destination_view[1] - self.source_view[1] )
+        spos, dpos = Vector(*self.source_view[1]), Vector(*self.destination_view[1])
+        t = spos + i*(dpos - spos )
         translate = translation_matrix((t.x, t.y, 0))
 
         q = quaternion_slerp(self.source_view[2], self.destination_view[2], i)
