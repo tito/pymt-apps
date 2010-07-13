@@ -2,6 +2,7 @@ import os
 import time
 import json
 from pymt import *
+from pymt.lib.transformations import *
 from pymt.parser import parse_color
 
 import euclid
@@ -143,19 +144,16 @@ class Presemt(MTWidget):
         return True
 
     def capture_current_view(self):
-        p0 = self.ui_canvas.to_parent(0., 0.)
-        p1 = self.ui_canvas.to_parent(1., 0.)
-        scale = Vector(*p0).distance(p1)
-        pos = self.ui_canvas.to_parent(0, 0)
-        mat_trans = euclid.Matrix4()
-        mat_trans[:] = self.ui_canvas.transform_mat.flatten()
-        mat_trans.translate(-pos[0], -pos[1], 0)
-        mat_trans.scale(1.0 / scale, 1.0 / scale, 1.0)
-        return (scale, pos, euclid.Quaternion.new_rotate_matrix(mat_trans))
+        #current view = translation, scale and rotation around(0,0)
+        #we store quaternion, becasue it is much better for interpolating angles (always rotates shortest way)
+        scale = self.ui_canvas.scale
+        pos = Vector(*self.ui_canvas.to_parent(0, 0))
+        quat = quaternion_from_matrix(self.ui_canvas.transform)
+        return (scale, pos, quat)
 
     def goto_view(self, bookmark):
-        self.source_view = bookmark.view_transform
-        self.destination_view = self.capture_current_view()
+        self.source_view = self.capture_current_view()
+        self.destination_view = bookmark.view_transform
         self.current_bookmark = bookmark
         self.interpolation = 1.0
 
@@ -163,35 +161,27 @@ class Presemt(MTWidget):
         super(Presemt, self).on_update()
         if self.interpolation <= 0.0:
             return
-
-        #
-        # Thanks to Thomas for this fantastic code !
-        #
-
+        
         self.interpolation -= getFrameDt()
         if self.interpolation < 0:
             self.interpolation = 0
+    
+        #i goes from 0.0 to 1.0
+        i = AnimationAlpha.ease_in_out_quint(abs(1.0-self.interpolation))
+        
+        #create interpolated scale, translation and rotation matrix from saved state
+        s = self.source_view[0] + i * (self.destination_view[0] - self.source_view[0])
+        scale = scale_matrix(s)
 
-        i = AnimationAlpha.ease_in_out_quint(self.interpolation)
-        sx, sy = self.source_view[1]
-        tx, ty = self.destination_view[1]
-        dx, dy = sx + i * (tx - sx), sy + i *(ty - sy)
-        mat1 = euclid.Matrix4.new_translate(dx, dy, 1)
+        t = self.source_view[1] + i*(self.destination_view[1] - self.source_view[1] )
+        translate = translation_matrix((t.x, t.y, 0))
 
-        src_scale = self.source_view[0]
-        dst_scale = self.destination_view[0]
-        scale = src_scale + i * (dst_scale - src_scale)
-        mat2 = euclid.Matrix4.new_scale(scale, scale, 1)
-
-        qatern = euclid.Quaternion.new_interpolate(self.source_view[2], self.destination_view[2], i)
-        mat3 = qatern.get_matrix()
-
-        mat = mat1 * mat3 * mat2
-
-        # matrix from scatter is (4,4), matrix from euclid is (16)
-        flat = self.ui_canvas.transform_mat.flatten()
-        flat[:] = mat[:]
-        self.ui_canvas.transform_mat = flat.reshape((4, 4))
+        q = quaternion_slerp(self.source_view[2], self.destination_view[2], i)
+        rotate = quaternion_matrix(q)
+    
+        #combine the three matrices to get the transform for teh current interpolation value
+        mat = concatenate_matrices(translate,rotate,scale)
+        self.ui_canvas.transform = mat
 
         # finished ?
         if self.interpolation == 0 and self.current_bookmark:
