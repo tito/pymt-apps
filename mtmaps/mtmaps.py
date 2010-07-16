@@ -231,7 +231,7 @@ class InteractiveMap(ScatterMap):
 
         # ui provider
         self.ui = MTBoxLayout(pos=(20, 20), uniform_width=True,
-                             orientation='vertical', spacing=1, padding=10)
+                              orientation='vertical', spacing=10, padding=10)
         k = { 'bold': True, 'size': (150, 30), 'color_down': (.7,.7,.7,.6),
              'halign': 'center' }
         for provider in providers:
@@ -347,6 +347,7 @@ class InteractiveMap(ScatterMap):
 
         set_color(0, 0, 0, 0.8)
         drawRoundedRectangle(pos=self.ui.pos, size=self.ui.size)
+        self.ui.dispatch_event('on_update')
         self.ui.dispatch_event('on_draw')
 
     def draw(self):
