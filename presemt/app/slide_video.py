@@ -52,9 +52,9 @@ class SlideVideo(SlideItem):
         d = super(SlideVideo, self)._get_state()
         d['video'] = self.filename
         return d
-
     def _set_state(self, state):
         super(SlideVideo, self)._set_state(state)
         self.filename = state.get('video')
+    state = property(_get_state, _set_state)
 
 

@@ -25,8 +25,8 @@ class SlideText(SlideItem):
         d = super(SlideText, self)._get_state()
         d['label'] = self.textarea.value
         return d
-
     def _set_state(self, state):
         super(SlideText, self)._set_state(state)
         self.textarea.value = state.get('label')
+    state = property(_get_state, _set_state)
 

@@ -47,6 +47,7 @@ class SlideItem(MTScatterWidget):
     def _set_state(self, state):
         self.locked = state.get('locked')
         super(SlideItem, self)._set_state(state.get('matrix'))
+    state = property(_get_state, _set_state)
 
     def clean_filename(self, filename):
         # strip the curdir if possible

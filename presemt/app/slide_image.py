@@ -58,9 +58,9 @@ class SlideImage(SlideItem):
         d = super(SlideImage, self)._get_state()
         d['image'] = self.filename
         return d
-
     def _set_state(self, state):
         super(SlideImage, self)._set_state(state)
         self.filename = state.get('image')
+    state = property(_get_state, _set_state)
 
 
