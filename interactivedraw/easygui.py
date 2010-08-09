@@ -189,9 +189,6 @@ class EasyGui(MTBoxLayout):
         _set(default)
         self._change(key, default)
 
-    def do_layout(self):
-        super(EasyGui, self).do_layout()
-
 if __name__ == '__main__':
     gui = EasyGui(size_hint=(None, None), size=(400, 200))
     gui.panel('Control 1')

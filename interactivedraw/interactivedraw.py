@@ -195,6 +195,7 @@ class Canvas(GLPerspectiveWidget):
         self.dirty = True
 
     def on_update(self):
+        super(Canvas, self).on_update()
         if self.mode == 'record' and \
            len(self.sketch) > 0 and \
            len(getCurrentTouches()) == 0 and \
