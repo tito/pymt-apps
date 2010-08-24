@@ -3,16 +3,16 @@
 __all__ = ('YoutubeFormat', 'YoutubeGetFlv', 'YoutubeSearch')
 
 import re
-import urllib
+from urllib import urlopen, unquote
 
 YoutubeFormat = {
     '37': {'icon':'FHD',    'desc':'fmt=37 ( HD1080p/MP4/H.264/AAC )'},
-    '22': {'icon':'HD',        'desc':'fmt=22 ( HD720p /MP4/H.264/AAC )'},
-    '35': {'icon':'HQ',        'desc':'fmt=35 ( HQ     /FLV/H.264/AAC )'},
-    '34': {'icon':'LQ',        'desc':'fmt=34 ( LQ     /FLV/H.264/AAC )'},
-    '18': {'icon':'SD',        'desc':'fmt=18 ( iPod   /MP4/H.264/AAC )'},
-    '6': {'icon':'OLD',        'desc':'fmt=6  ( OldHQ  /FLV/H.263/MP3 )'},
-    '5': {'icon':'OLD',        'desc':'fmt=5  ( OldLQ  /FLV/H.263/MP3 )'},
+    '22': {'icon':'HD',     'desc':'fmt=22 ( HD720p /MP4/H.264/AAC )'},
+    '35': {'icon':'HQ',     'desc':'fmt=35 ( HQ     /FLV/H.264/AAC )'},
+    '34': {'icon':'LQ',     'desc':'fmt=34 ( LQ     /FLV/H.264/AAC )'},
+    '18': {'icon':'SD',     'desc':'fmt=18 ( iPod   /MP4/H.264/AAC )'},
+    '6':  {'icon':'OLD',    'desc':'fmt=6  ( OldHQ  /FLV/H.263/MP3 )'},
+    '5':  {'icon':'OLD',    'desc':'fmt=5  ( OldLQ  /FLV/H.263/MP3 )'},
     '17': {'icon':'MOB',    'desc':'fmt=17 ( Hmobile/3GP/MPEG4/AAC )'},
     '13': {'icon':'MOB',    'desc':'fmt=13 ( Lmobile/3GP/H.263/AMR )'},
 }
@@ -27,24 +27,25 @@ def YoutubeGetFlv(url):
     id = g.groups()[0].split('&')[0]
 
     # fetch the page
-    datas = urllib.urlopen(url).read()
+    datas = urlopen(url).read()
 
     flvurls = []
     for data in datas.split("\n"):
         g = re.match('.*l_map": "([^"]*)"', data)
         if not g:
             continue
-        flvurls = g.groups()[0]
-        flvurls = urllib.unquote(flvurls).split(',')
+        flvurls = g.groups()[0].split(',')
         break
 
-    return [x.split('|') for x in flvurls]
+    flvurls = [x.split('|') for x in flvurls]
+    return [(fmt, unquote(value).replace('\\/', '/')) for fmt, value in
+            flvurls]
 
 def YoutubeSearch(keyword):
     from xml.dom.minidom import parseString
 
     url = 'http://gdata.youtube.com/feeds/api/videos?q=%s' % (keyword)
-    data = urllib.urlopen(url).read()
+    data = urlopen(url).read()
     dom = parseString(data)
     entries = dom.getElementsByTagName('entry')
 
@@ -63,7 +64,7 @@ def YoutubeSearch(keyword):
         for link in entry.getElementsByTagName('link'):
             if link.getAttribute('type') != 'text/html':
                 continue
-            result['url'] = urllib.unquote(link.getAttribute('href'))
+            result['url'] = unquote(link.getAttribute('href'))
         for media in entry.getElementsByTagName('media:thumbnail'):
             result['thumbnail'].append({
                 'url': media.getAttribute('url'),
