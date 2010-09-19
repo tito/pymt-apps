@@ -22,7 +22,7 @@ def shader_load(filename):
 # shader from http://www.geeks3d.com/20091116/shader-library-2d-shockwave-post-processing-filter-glsl/
 class ShadShock(MTWidget):
 	title = 'Shock Wave'
-	author = 'Remi'
+	author = 'Geeks3D'
 	
 	def __init__(self, **kwargs):
 		super(ShadShock, self).__init__(**kwargs)
@@ -131,7 +131,7 @@ class ShadWave(MTWidget):
 # http://www.iquilezles.org/apps/shadertoy/
 class ShadMandel(MTWidget):
 	title = 'Mandelbrot'
-	author = 'Remi'
+	author = 'iq'
 	
 	def __init__(self, **kwargs):
 		super(ShadMandel, self).__init__(**kwargs)
@@ -170,7 +170,7 @@ class ShadMandel(MTWidget):
 # http://www.iquilezles.org/apps/shadertoy/
 class ShadJulia(MTWidget):
 	title = 'Julia'
-	author = 'Remi'
+	author = 'iq'
 	
 	def __init__(self, **kwargs):
 		super(ShadJulia, self).__init__(**kwargs)
@@ -181,6 +181,327 @@ class ShadJulia(MTWidget):
 		self.timer = time.time()
 		
 		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('julia_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadMonjori(MTWidget):
+	title = 'Monjori'
+	author = 'Mic'
+	
+	def __init__(self, **kwargs):
+		super(ShadMonjori, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('monjori_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadDeform(MTWidget):
+	title = 'Deform'
+	author = 'iq'
+	
+	def __init__(self, **kwargs):
+		super(ShadDeform, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('deform_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.bg = Image.load(os.path.join(os.path.dirname(__file__), 'ressource/pebble.jpg'))
+		self.bg.scale = max(float(self.height)/self.bg.height,float(self.width)/self.bg.width)
+		self.fbo = Fbo(size=(w,h))
+  
+
+	def on_touch_up(self, touch):
+		self.mouseX = touch.x
+		self.mouseY = touch.y
+	
+	def on_touch_move(self, touch):
+		self.mouseX = touch.x
+		self.mouseY = touch.y
+
+	def on_update(self):
+		pass
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.bg.draw()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['mouseX'] = self.mouseX
+		self.shader['mouseY'] = self.mouseY
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadClod(MTWidget):
+	title = 'Clod'
+	author = 'Tigrou'
+	
+	def __init__(self, **kwargs):
+		super(ShadClod, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('clod_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadMetatunnel(MTWidget):
+	title = 'Metatunnel'
+	author = 'TX95'
+	
+	def __init__(self, **kwargs):
+		super(ShadMetatunnel, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('metatunnel_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadRibbon(MTWidget):
+	title = 'To The Road Of Ribbon'
+	author = 'TX95'
+	
+	def __init__(self, **kwargs):
+		super(ShadRibbon, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('ribbon_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadQuaternion(MTWidget):
+	title = 'Quaternion'
+	author = 'iq'
+	
+	def __init__(self, **kwargs):
+		super(ShadQuaternion, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('quaternion_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadSult(MTWidget):
+	title = 'Sult'
+	author = 'Loonies'
+	
+	def __init__(self, **kwargs):
+		super(ShadSult, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('sult_fragment.txt'))
+		
+		self.mouseX = 0.0
+		self.mouseY = 0.0
+		
+		w,h = self.size
+		
+		self.fbo = Fbo(size=(w,h))
+
+	def draw(self):
+		w,h = self.size
+		set_color(1)
+		self.fbo.bind()
+		self.shader.use()
+		self.shader['resX'] = self.width
+		self.shader['resY'] = self.height
+		self.shader['time'] = time.time() - self.timer
+		drawTexturedRectangle(self.fbo.texture, (0,0),(self.width,self.height))
+		self.shader.stop()
+	
+		glColor4f(1,1,1,1)
+		
+		self.fbo.release()
+		drawTexturedRectangle(self.fbo.texture, size=(w,h))
+
+# http://www.iquilezles.org/apps/shadertoy/
+class ShadSlisesix(MTWidget):
+	title = 'Slisesix'
+	author = 'iq'
+	
+	def __init__(self, **kwargs):
+		super(ShadSlisesix, self).__init__(**kwargs)
+		
+		self.width = ww
+		self.height = wh
+		
+		self.timer = time.time()
+		
+		self.shader = Shader(shader_load('std_vertex.txt'), shader_load('slisesix_fragment.txt'))
 		
 		self.mouseX = 0.0
 		self.mouseY = 0.0
@@ -290,7 +611,10 @@ class VizPlay(MTWidget):
 				  font_size=22,
 				  color=(1, 1, 1, .7 * ia),
 				  pos=(w2, 30))
-
+		drawLabel(label=self.current.author,
+                  font_size=10,
+                  color=(1, 1, 1, .5 * ia),
+                  pos=(w2, 12))
 		# next / previous
 		drawLabel(label='<',
 				  font_size=42,
@@ -319,8 +643,16 @@ class VizPlay(MTWidget):
 if __name__ == '__main__':
 	viz = VizPlay()
 	viz.add_scenario(ShadShock())
+	viz.add_scenario(ShadSult())
+	viz.add_scenario(ShadQuaternion())
+	viz.add_scenario(ShadRibbon())
+	viz.add_scenario(ShadMetatunnel())
+	viz.add_scenario(ShadClod())
+	viz.add_scenario(ShadDeform())
+	viz.add_scenario(ShadMonjori())
 	viz.add_scenario(ShadJulia())
 	viz.add_scenario(ShadMandel())
 	viz.add_scenario(ShadWave())
+	viz.add_scenario(ShadSlisesix())
 	
 	runTouchApp(viz)
