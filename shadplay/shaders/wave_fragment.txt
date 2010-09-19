@@ -1,0 +1,16 @@
+uniform sampler2D	tex;
+uniform float fMouseCoordX;
+uniform float fMouseCoordY;
+
+void main (void) {
+
+	vec2  Texcoord = gl_TexCoord[0].st;
+	vec4  color = vec4 (0.0, 0.0, 0.0, 0.0);
+	
+	Texcoord.x = Texcoord.x + cos(Texcoord.y*fMouseCoordX/16.0)*0.01;
+	Texcoord.y = Texcoord.y + sin(Texcoord.x*fMouseCoordY/16.0)*0.01;
+	
+	
+	color = texture2D (tex, Texcoord);
+	gl_FragColor =	color;
+}

@@ -1,0 +1,26 @@
+uniform sampler2D sceneTex; // 0
+uniform float param_x; // Mouse position
+uniform float param_y;
+uniform float time; // effect elapsed time
+uniform float param1;
+uniform float param2;
+uniform float param3;
+
+void main()
+{
+  vec2 center = vec2(param_x,param_y);
+  vec2 uv = gl_TexCoord[0].xy;
+  vec2 texCoord = uv;
+  float distance = distance(uv, center);
+  if ( (distance <= (time + param3)) &&
+       (distance >= (time - param3)) )
+  {
+    float diff = (distance - time);
+    float powDiff = 1.0 - pow(abs(diff*param1),
+                                param2);
+    float diffTime = diff  * powDiff;
+    vec2 diffUV = normalize(uv - center);
+    texCoord = uv + (diffUV * diffTime);
+  }
+  gl_FragColor = texture2D(sceneTex, texCoord);
+}
