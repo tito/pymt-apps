@@ -31,6 +31,23 @@ import sqlite3
 import math
 import time
 
+css_add_sheet(
+'''
+.button-go {
+    bg-color: rgba(65, 123, 161, 200);
+}
+
+.button-restart {
+    bg-color: rgba(65, 123, 161, 200);
+}
+
+.button-restart,
+.button-go,
+.textinput-go {
+    draw-border: 0;
+}
+''')
+
 class YoutubeSearcher(threading.Thread):
     def __init__(self, keyword):
         super(YoutubeSearcher, self).__init__()
@@ -177,10 +194,12 @@ class MTYoutubeSearchBox(MTBoxLayout):
         kwargs.setdefault('margin', 50)
         super(MTYoutubeSearchBox, self).__init__(**kwargs)
         self.x = -2000
-        self.go = MTButton(label='Search >', font_size=50, size=(350, 100),
-                           style={'bg-color': (65/255., 123/255., 161/255., .6)}, halign='center')
+        self.go = MTButton(label='Search >', font_size=50,
+                           size_hint=(.4, 1), halign='center',
+                           cls='button-go')
         self.add_widget(self.go)
-        self.textinput = MTTextInput(font_size=50)
+        self.textinput = MTTextInput(font_size=50, size_hint=(.6, 1),
+                                    cls='textinput-go')
         self.add_widget(self.textinput)
         self._init_ = False
 
@@ -224,11 +243,11 @@ class MTYoutubeBrowser(MTWidget):
     def __init__(self, keyword, **kwargs):
         super(MTYoutubeBrowser, self).__init__(**kwargs)
         self.searcher = None
-        self.searchbox = MTYoutubeSearchBox()
+        self.searchbox = MTYoutubeSearchBox(size=(500, 200))
         self.searchbox.connect('on_search', self.on_search)
         self.add_widget(self.searchbox)
-        self.hidesearch = MTButton(label='Restart',
-                           style={'bg-color': (65/255., 123/255., 161/255., .2)}, halign='center')
+        self.hidesearch = MTButton(label='Restart', cls='button-restart',
+                                   halign='center')
         self.add_widget(self.hidesearch)
         self.hidesearch.hide()
         self.hidesearch.connect('on_release', self.restart)
