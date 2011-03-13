@@ -138,6 +138,7 @@ class BookmarkBar(MTList):
     def _set_state(self, state):
         for x in state:
             bookmark = ViewBookMark(None, info=x.get('info'))
-            bookmark.view_transform = (x.get('scale'), x.get('pos'), x.get('quat'))
+            bookmark.view_transform = (x.get('scale'), x.get('pos'),
+                                       deserialize_numpy(x.get('quat')))
             self.add_bookmark(bookmark)
     state = property(_get_state, _set_state)
